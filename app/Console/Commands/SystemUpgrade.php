@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Domain\System\OperationFailed;
+use App\Domain\System\ReleaseManifest;
+use App\Domain\System\SystemStatus;
+use App\Enums\RunStatus;
+use App\Models\AnalysisRun;
+use App\Models\SystemRelease;
+use App\Models\SystemSetting;
+use Database\Seeders\SystemSeeder;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
+
+#[Signature('system:upgrade
+    {--non-interactive : Jangan bertanya}
+    {--backup-verified : Konfirmasi backup terverifikasi (wajib di production)}
+    {--drain-timeout=120 : Detik menunggu run aktif selesai}')]
+#[Description('Upgrade ke release ini: cek checksum migration, jeda analisis, migration maju, seed, health check')]
+class SystemUpgrade extends SystemOperation
+{
+    protected function operation(): string
+    {
+        return 'upgrade';
+    }
+
+    protected function perform(): void
+    {
+        $manifest = app(ReleaseManifest::class);
+        $installed = Schema::hasTable('system_releases') ? SystemRelease::query()->latest('installed_at')->first() : null;
+
+        if (! $installed) {
+            throw new OperationFailed('not_installed', 'Aplikasi belum terinstal; jalankan php artisan system:install.');
+        }
+
+        $this->report['from_version'] = $installed->app_version;
+        $this->startRecord();
+
+        $this->step('checksum', function () use ($installed) {
+            $modified = app(SystemStatus::class)->modifiedMigrations($installed);
+
+            if ($modified !== []) {
+                throw new OperationFailed('migration_modified', 'Migration yang sudah terpasang diubah; buat migration baru: '.implode(', ', $modified));
+            }
+        });
+
+        if (app()->isProduction() && ! $this->option('backup-verified')) {
+            throw new OperationFailed('backup_required', 'Production memerlukan --backup-verified setelah backup diuji.', self::EXIT_PREFLIGHT);
+        }
+
+        $before = app(SystemStatus::class)->pendingMigrations();
+        $this->step('pause', fn () => $this->pauseAnalysis());
+
+        $this->step('migrate', fn () => $this->migrate());
+        $this->report['migrations_applied'] = $before;
+
+        $this->step('seed', fn () => (new SystemSeeder)->run());
+        $this->step('health', fn () => $this->report['analysis_ready'] = app(SystemStatus::class)->collect()['analysis_ready']);
+        $this->step('release', fn () => $this->recordRelease());
+
+        SystemSetting::put('analysis.paused', false);
+        $this->report['to_version'] = $manifest->version();
+        Artisan::call('optimize:clear');
+    }
+
+    private function pauseAnalysis(): void
+    {
+        SystemSetting::put('analysis.paused', true);
+        Artisan::call('queue:restart');
+
+        $deadline = time() + (int) $this->option('drain-timeout');
+
+        while (AnalysisRun::query()->withoutGlobalScopes()->where('status', RunStatus::Running->value)->exists()) {
+            if (time() >= $deadline) {
+                SystemSetting::put('analysis.paused', false);
+
+                throw new OperationFailed('workers_busy', 'Masih ada analisis berjalan; tunggu selesai atau batalkan lalu ulangi upgrade.');
+            }
+
+            sleep(2);
+        }
+    }
+}
