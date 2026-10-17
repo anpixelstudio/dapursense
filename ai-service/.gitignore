@@ -1,5 +1,6 @@
 .venv/
 var/
 models/*.onnx
+models/*.pt
 __pycache__/
 .pytest_cache/

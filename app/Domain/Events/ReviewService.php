@@ -25,7 +25,7 @@ class ReviewService
 
         if (! $from->canTransitionTo($to, $event->category)) {
             throw ValidationException::withMessages([
-                'to_status' => "Transisi {$from->value} → {$to->value} tidak diizinkan untuk kategori {$event->category->value}.",
+                'to_status' => "Transition {$from->value} → {$to->value} is not allowed for category {$event->category->value}.",
             ])->status(422);
         }
 
@@ -80,28 +80,28 @@ class ReviewService
         $reason = trim((string) ($input['reason'] ?? ''));
 
         if ($to === ReviewStatus::Confirmed && $reason === '') {
-            $errors['reason'] = 'Alasan wajib diisi untuk konfirmasi.';
+            $errors['reason'] = 'A reason is required to confirm.';
         }
 
         if ($to === ReviewStatus::Dismissed) {
             if (! in_array($input['reason_code'] ?? null, ReviewStatus::DISMISS_REASONS, true)) {
-                $errors['reason_code'] = 'Pilih kode alasan penolakan.';
+                $errors['reason_code'] = 'Select a dismissal reason code.';
             }
             if ($reason === '') {
-                $errors['reason'] = 'Catatan penolakan wajib diisi.';
+                $errors['reason'] = 'A dismissal note is required.';
             }
         }
 
         if ($to === ReviewStatus::Resolved && trim((string) ($input['action_note'] ?? '')) === '') {
-            $errors['action_note'] = 'Catatan tindakan penanganan wajib diisi.';
+            $errors['action_note'] = 'A resolution action note is required.';
         }
 
         if ($from->isReopen($to)) {
             if (! in_array($role, [Role::Owner, Role::Supervisor], true)) {
-                $errors['to_status'] = 'Hanya Owner atau Supervisor yang dapat membuka ulang kejadian.';
+                $errors['to_status'] = 'Only Owner or Supervisor can reopen an event.';
             }
             if ($reason === '') {
-                $errors['reason'] = 'Alasan membuka ulang wajib diisi.';
+                $errors['reason'] = 'A reason is required to reopen.';
             }
         }
 

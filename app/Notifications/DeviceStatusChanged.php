@@ -28,11 +28,11 @@ class DeviceStatusChanged extends Notification
             'tenant_id' => $this->device->tenant_id,
             'kind' => $this->up ? 'device_up' : 'device_down',
             'title' => $this->up
-                ? "{$this->device->name} kembali online"
+                ? "{$this->device->name} back online"
                 : "{$this->device->name} offline",
             'body' => $this->up
-                ? "Perangkat{$target} pulih setelah sekitar {$minutes} menit offline."
-                : "Perangkat{$target} tidak merespons {$this->device->failure_threshold} kali berturut-turut.",
+                ? "Device{$target} recovered after about {$minutes} minute(s) offline."
+                : "Device{$target} failed to respond {$this->device->failure_threshold} time(s) in a row.",
             'url' => route('uptime.index', [], false),
         ];
     }

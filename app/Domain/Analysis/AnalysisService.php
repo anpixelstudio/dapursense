@@ -22,22 +22,22 @@ class AnalysisService
     public function start(VideoAsset $video, AiModel $model, RuleSet $ruleSet, string $mode, User $actor): AnalysisRun
     {
         if (SystemSetting::get('analysis.paused', false)) {
-            throw ValidationException::withMessages(['mode' => 'Analisis sedang dijeda karena upgrade sistem. Coba lagi setelah upgrade selesai.']);
+            throw ValidationException::withMessages(['mode' => 'Analysis is paused during a system upgrade. Try again after the upgrade completes.']);
         }
 
         if (! $video->canReanalyze()) {
-            throw ValidationException::withMessages(['video' => 'Video belum siap atau file asli sudah kedaluwarsa sehingga analisis ulang tidak tersedia.']);
+            throw ValidationException::withMessages(['video' => 'Video is not ready or the original file has expired; re-analysis is unavailable.']);
         }
 
         if ($mode === 'simulation' && ! $model->isSimulator()) {
-            throw ValidationException::withMessages(['model_id' => 'Mode simulasi hanya dapat memakai model simulator.']);
+            throw ValidationException::withMessages(['model_id' => 'Simulation mode may only use the simulator model.']);
         }
 
         if ($mode === 'actual' && $model->isSimulator()) {
-            throw ValidationException::withMessages(['model_id' => 'Model simulator tidak boleh dipakai untuk analisis nyata.']);
+            throw ValidationException::withMessages(['model_id' => 'The simulator model cannot be used for real analysis.']);
         }
 
-        $revision = $ruleSet->activeRevision ?? throw ValidationException::withMessages(['rule_set_id' => 'Rule set belum memiliki revisi aktif.']);
+        $revision = $ruleSet->activeRevision ?? throw ValidationException::withMessages(['rule_set_id' => 'Rule set has no active revision.']);
 
         $zones = Zone::query()->where('source_id', $video->source_id)->where('active', true)->get();
 

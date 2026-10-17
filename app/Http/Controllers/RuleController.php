@@ -47,7 +47,7 @@ class RuleController extends Controller
         $ruleSet = RuleSet::query()->create($validated);
         $publisher->publish($ruleSet, SopTemplate::defaultConfig(), $request->user());
         Audit::log('rules.created', $ruleSet);
-        $this->toast('Rule set dibuat dari template SOP.');
+        $this->toast('Rule set created from SOP template.');
 
         return back();
     }
@@ -59,7 +59,7 @@ class RuleController extends Controller
 
         $revision = $publisher->publish($ruleSet, $validated['config'], $request->user());
         Audit::log('rules.published', $ruleSet, ['version' => $revision->version, 'checksum' => $revision->checksum]);
-        $this->toast("Revisi aturan v{$revision->version} diterbitkan.");
+        $this->toast("Rule revision v{$revision->version} published.");
 
         return back();
     }

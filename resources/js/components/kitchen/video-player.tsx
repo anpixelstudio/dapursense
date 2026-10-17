@@ -77,7 +77,7 @@ export function VideoPlayer({
                     }}
                     onError={() =>
                         setError(
-                            'Video tidak dapat diputar. File mungkin sudah kedaluwarsa sesuai retensi.',
+                            'Video cannot be played. The file may have expired per retention policy.',
                         )
                     }
                 />
@@ -94,7 +94,7 @@ export function VideoPlayer({
                         checked={showZones}
                         onChange={(e) => setShowZones(e.target.checked)}
                     />{' '}
-                    Zona
+                    Zones
                 </label>
                 <label className="flex items-center gap-1">
                     <input
@@ -102,12 +102,12 @@ export function VideoPlayer({
                         checked={showBoxes}
                         onChange={(e) => setShowBoxes(e.target.checked)}
                     />{' '}
-                    Deteksi AI
+                    AI detections
                 </label>
                 {expired && (
                     <span>
-                        Observasi per frame sudah kedaluwarsa; event dan
-                        interval tetap tersedia.
+                        Per-frame observations have expired; events and
+                        intervals remain available.
                     </span>
                 )}
                 {error && <span className="text-destructive">{error}</span>}
@@ -122,7 +122,7 @@ export function detectionBoxes(frame: ObservationFrame | null): OverlayBox[] {
             .filter(([, s]) => s === 'missing')
             .map(([i]) => ppeLabel(i));
         return {
-            label: `Orang ${d.track_key}${missing.length ? ` · tanpa ${missing.join(', ')}` : ''}`,
+            label: `Person ${d.track_key}${missing.length ? ` · missing ${missing.join(', ')}` : ''}`,
             bbox: d.bbox,
             color: missing.length ? '#ef4444' : '#22c55e',
         };

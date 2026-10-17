@@ -27,7 +27,7 @@ test('cross-tenant objects return 404 instead of 403', function () {
         'name' => 'Diambil alih', 'timezone' => 'Asia/Jakarta',
     ])->assertNotFound();
 
-    expect(Property::query()->withoutGlobalScopes()->find($foreign['property']->id)->name)->toBe('Properti');
+    expect(Property::query()->withoutGlobalScopes()->find($foreign['property']->id)->name)->toBe('Property');
 });
 
 test('foreign ids in payloads fail validation', function () {
@@ -35,7 +35,7 @@ test('foreign ids in payloads fail validation', function () {
     $foreign = makeLocation(tenantOf(tenantUser()));
 
     $this->actingAs($alice)->post(route('kitchens.store'), [
-        'property_id' => $foreign['property']->id, 'name' => 'Dapur Palsu',
+        'property_id' => $foreign['property']->id, 'name' => 'Fake Kitchen',
     ])->assertSessionHasErrors('property_id');
 });
 

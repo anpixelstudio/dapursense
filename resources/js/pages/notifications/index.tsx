@@ -32,10 +32,10 @@ export default function Notifications({
 
     return (
         <>
-            <Head title="Notifikasi" />
+            <Head title="Notifications" />
             <Page>
                 <PageHeader
-                    title="Notifikasi"
+                    title="Notifications"
                     actions={
                         unread && (
                             <Button
@@ -55,8 +55,8 @@ export default function Notifications({
                 />
                 {list.length === 0 ? (
                     <EmptyState
-                        title="Belum ada notifikasi"
-                        description="Notifikasi muncul saat analisis selesai dengan kejadian yang perlu ditinjau atau laporan siap diunduh."
+                        title="No notifications yet"
+                        description="Notifications appear when analysis completes with events needing review or reports ready to download."
                     />
                 ) : (
                     <ul className="divide-y rounded-xl border">
@@ -104,5 +104,5 @@ export default function Notifications({
 }
 
 Notifications.layout = {
-    breadcrumbs: [{ title: 'Notifikasi', href: notifications.index() }],
+    breadcrumbs: [{ title: 'Notifications', href: notifications.index() }],
 };

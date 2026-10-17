@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $context->role()->can($permission)
                 ? Response::allow()
-                : Response::deny('Peran Anda tidak memiliki izin untuk aksi ini.');
+                : Response::deny('Your role does not have permission for this action.');
         });
 
         Gate::define('platform-admin', fn (User $user) => $user->is_platform_admin);

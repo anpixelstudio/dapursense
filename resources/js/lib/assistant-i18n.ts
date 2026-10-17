@@ -2,16 +2,16 @@ export type AssistantLocale = 'en' | 'id';
 
 const LOCALE_KEY = 'dapursense.assistant.locale';
 
+/** Always English — ID locale is retired. */
 export function loadAssistantLocale(): AssistantLocale {
-    if (typeof window === 'undefined') {
-        return 'en';
-    }
-    const raw = localStorage.getItem(LOCALE_KEY);
-    return raw === 'id' ? 'id' : 'en';
+    return 'en';
 }
 
-export function saveAssistantLocale(locale: AssistantLocale): void {
-    localStorage.setItem(LOCALE_KEY, locale);
+export function saveAssistantLocale(_locale: AssistantLocale): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    localStorage.setItem(LOCALE_KEY, 'en');
 }
 
 type Copy = {
@@ -90,7 +90,7 @@ const EN: Copy = {
     demoMode: 'Demo mode',
     helpTitle: 'How can I help?',
     helpDescription:
-        'Pick a ready question. Answers use your tenant SOP when available. Switch EN/ID anytime.',
+        'Pick a ready question. Answers use your tenant SOP when available.',
     helpClose: 'Close',
     helpAsk: 'Ask this',
     focusOps: 'Operations',
@@ -136,85 +136,6 @@ const EN: Copy = {
     ],
 };
 
-const ID: Copy = {
-    title: 'Asisten',
-    brand: 'Anpixel DapurSense',
-    chat: 'Chat',
-    report: 'Laporan',
-    history: 'Riwayat',
-    newChat: 'Baru',
-    newThread: 'Chat baru',
-    help: 'Bantuan',
-    helper: 'Helper cepat',
-    chatTitleFallback: 'Chat baru',
-    chatHint: 'Tanya jawab SOP · jailbreak ditolak',
-    emptyTitle: 'Helper dapur siap',
-    emptyBody:
-        'Tanya SOP, APD, atau zona — atau buka Helper cepat untuk pertanyaan siap pakai.',
-    placeholder: 'Tanya tentang SOP dapur…',
-    send: 'Kirim',
-    enterHint: 'Enter untuk kirim ·',
-    summarizeLink: 'Ringkas anomali',
-    reportTitle: 'Laporan operasional harian',
-    reportHint: 'Prompt terkunci · hanya statistik · tanpa input bebas',
-    generate: 'Buat laporan',
-    generating: 'Membuat…',
-    copy: 'Salin',
-    copied: 'Tersalin',
-    reportEmpty: 'Pilih fokus fokus, lalu buat laporan.',
-    thinking: 'Memikirkan…',
-    geminiMissingTitle: 'Gemini belum terhubung',
-    geminiMissingBody: 'Minta admin mengatur GEMINI_API_KEY.',
-    requestFailed: 'Permintaan gagal',
-    demoMode: 'Mode demo',
-    helpTitle: 'Ada yang bisa dibantu?',
-    helpDescription:
-        'Pilih pertanyaan siap pakai. Jawaban memakai SOP tenant bila tersedia. Ganti EN/ID kapan saja.',
-    helpClose: 'Tutup',
-    helpAsk: 'Tanyakan ini',
-    focusOps: 'Operasional',
-    focusOpsHint: 'Ringkasan seimbang 7 hari',
-    focusSafety: 'Keselamatan',
-    focusSafetyHint: 'Zona terlarang & review terbuka',
-    focusThroughput: 'Throughput',
-    focusThroughputHint: 'Kehadiran orang & video teranalisis',
-    helpers: [
-        {
-            category: 'Laporan & karyawan',
-            prompts: [
-                'Ada report apa hari ini?',
-                'Ada report apa kemarin?',
-                'Ada report apa bulan ini?',
-                'Berapa jumlah karyawan dan orang terdeteksi hari ini?',
-            ],
-        },
-        {
-            category: 'SOP & APD',
-            prompts: [
-                'Apakah celemek wajib di zona masak?',
-                'APD apa yang wajib untuk persiapan makanan?',
-                'Ringkas aturan SOP aktif kami dalam checklist singkat.',
-            ],
-        },
-        {
-            category: 'Zona',
-            prompts: [
-                'Apa yang termasuk area terlarang?',
-                'Siapa yang boleh masuk zona prep?',
-                'Buatkan todo list untuk audit kamera zona terlarang.',
-            ],
-        },
-        {
-            category: 'Alur review',
-            prompts: [
-                'Bagaimana cara mereview anomali APD yang masih OPEN?',
-                'Apa bedanya konfirmasi dan abaikan (dismiss)?',
-                'Buatkan checklist membersihkan review OPEN sebelum jam sibuk.',
-            ],
-        },
-    ],
-};
-
-export function assistantCopy(locale: AssistantLocale): Copy {
-    return locale === 'id' ? ID : EN;
+export function assistantCopy(_locale: AssistantLocale = 'en'): Copy {
+    return EN;
 }

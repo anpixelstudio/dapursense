@@ -58,7 +58,7 @@ class ReportController extends Controller
 
         GenerateReportJob::dispatch($report->id);
         Audit::log('report.requested', $report, ['format' => $format, 'filters' => $validated]);
-        $this->toast('Laporan masuk antrean pembuatan.');
+        $this->toast('Report queued for generation.');
 
         return back();
     }
@@ -66,14 +66,14 @@ class ReportController extends Controller
     public function download(Report $report): BinaryFileResponse
     {
         $this->authorizePermission(Permission::DownloadReports, $report);
-        abort_unless($report->status === 'READY' && $report->key, 404, 'Laporan belum siap atau sudah kedaluwarsa.');
+        abort_unless($report->status === 'READY' && $report->key, 404, 'Report is not ready or has expired.');
 
         $disk = Storage::disk($report->disk);
-        abort_unless($disk->exists($report->key), 404, 'File laporan sudah dihapus sesuai retensi.');
+        abort_unless($disk->exists($report->key), 404, 'Report file was deleted per retention policy.');
 
         Audit::log('report.downloaded', $report);
 
-        return response()->download($disk->path($report->key), "laporan-{$report->id}.{$report->format}", [
+        return response()->download($disk->path($report->key), "report-{$report->id}.{$report->format}", [
             'Content-Type' => $report->format === 'pdf' ? 'application/pdf' : 'text/csv; charset=UTF-8',
         ]);
     }
@@ -105,7 +105,7 @@ class ReportController extends Controller
         ]);
 
         Audit::log('report.schedule_created', $schedule);
-        $this->toast('Jadwal laporan dibuat.');
+        $this->toast('Report schedule created.');
 
         return back();
     }
@@ -115,7 +115,7 @@ class ReportController extends Controller
         $this->authorizePermission(Permission::GenerateReports, $schedule);
         $schedule->delete();
         Audit::log('report.schedule_deleted', $schedule);
-        $this->toast('Jadwal laporan dihapus.');
+        $this->toast('Report schedule removed.');
 
         return back();
     }

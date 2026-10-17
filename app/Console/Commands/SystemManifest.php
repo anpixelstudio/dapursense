@@ -8,8 +8,8 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-#[Signature('system:manifest {--app-version= : Versi SemVer hasil release tool} {--build-id= : ID build CI} {--git-sha= : Commit SHA}')]
-#[Description('Tulis release-manifest.json immutable untuk artefak release (dipakai pipeline CI)')]
+#[Signature('system:manifest {--app-version= : SemVer from release tool} {--build-id= : CI build ID} {--git-sha= : Commit SHA}')]
+#[Description('Write immutable release-manifest.json for release artifacts (CI pipeline)')]
 class SystemManifest extends Command
 {
     public function handle(ReleaseManifest $manifest): int
@@ -17,7 +17,7 @@ class SystemManifest extends Command
         $version = (string) $this->option('app-version');
 
         if (! preg_match('/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/', $version)) {
-            $this->components->error('--app-version harus SemVer, contoh 1.2.3');
+            $this->components->error('--app-version must be SemVer, e.g. 1.2.3');
 
             return self::FAILURE;
         }
@@ -34,7 +34,7 @@ class SystemManifest extends Command
         ];
 
         File::put($manifest->path(), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
-        $this->components->info("release-manifest.json ditulis untuk {$version}");
+        $this->components->info("release-manifest.json written for {$version}");
 
         return self::SUCCESS;
     }

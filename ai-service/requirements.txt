@@ -4,4 +4,5 @@ httpx>=0.27
 numpy>=2.0
 # OpenCV 5 removed the HOG people detector used by the opencv-hog-person baseline.
 opencv-python-headless>=4.10,<5
+onnxruntime>=1.17
 pytest>=8

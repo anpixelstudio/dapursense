@@ -18,18 +18,18 @@ type Props = {
 export default function Register({ passwordRules, invitation }: Props) {
     return (
         <>
-            <Head title="Daftar" />
+            <Head title="Sign up" />
             {invitation && (
                 <p
                     className="rounded-lg border bg-muted/40 px-3 py-2 text-sm"
                     data-test="register-invitation"
                 >
-                    Anda diundang bergabung ke{' '}
+                    You were invited to join{' '}
                     <span className="font-medium">
                         {invitation.organization}
                     </span>
-                    . Daftar dengan email {invitation.email} untuk menerima
-                    undangan; organisasi baru tidak akan dibuat.
+                    . Sign up with email {invitation.email} to accept the
+                    invitation; a new organization will not be created.
                 </p>
             )}
             <Form
@@ -42,7 +42,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Nama</Label>
+                                <Label htmlFor="name">Name</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -51,7 +51,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Nama lengkap"
+                                    placeholder="Full name"
                                 />
                                 <InputError message={errors.name} />
                             </div>
@@ -59,7 +59,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                             {!invitation && (
                                 <div className="grid gap-2">
                                     <Label htmlFor="organization_name">
-                                        Nama organisasi
+                                        Organization name
                                     </Label>
                                     <Input
                                         id="organization_name"
@@ -85,7 +85,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                                     autoComplete="email"
                                     name="email"
                                     defaultValue={invitation?.email}
-                                    placeholder="email@contoh.com"
+                                    placeholder="email@example.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -106,7 +106,7 @@ export default function Register({ passwordRules, invitation }: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Konfirmasi password
+                                    Confirm password
                                 </Label>
                                 <PasswordInput
                                     id="password_confirmation"
@@ -134,9 +134,9 @@ export default function Register({ passwordRules, invitation }: Props) {
                                         htmlFor="terms"
                                         className="text-sm leading-snug font-normal"
                                     >
-                                        Saya menyetujui penggunaan sistem untuk
-                                        analisis aktivitas dapur tanpa
-                                        pengenalan wajah.
+                                        I agree to use this system for kitchen
+                                        activity analysis without facial
+                                        recognition.
                                     </Label>
                                 </div>
                                 <InputError message={errors.terms} />
@@ -149,14 +149,14 @@ export default function Register({ passwordRules, invitation }: Props) {
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Buat akun
+                                Create account
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
                             Sudah punya akun?{' '}
                             <TextLink href={login()} tabIndex={8}>
-                                Masuk
+                                Log in
                             </TextLink>
                         </div>
                     </>
@@ -167,7 +167,7 @@ export default function Register({ passwordRules, invitation }: Props) {
 }
 
 Register.layout = {
-    title: 'Buat akun',
+    title: 'Create account',
     description:
-        'Pendaftar menjadi Owner organisasi baru, kecuali datang dari link undangan.',
+        'Registrants become Owner of a new organization unless joining via invitation link.',
 };

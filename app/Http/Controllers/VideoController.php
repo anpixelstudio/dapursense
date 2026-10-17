@@ -63,7 +63,7 @@ class VideoController extends Controller
         $this->authorizePermission(Permission::UploadVideo);
 
         if ($storage->isBlocked()) {
-            return back()->withErrors(['video' => 'Penyimpanan hampir penuh; upload baru diblokir sampai ruang dibebaskan. Bukti lama tidak dihapus otomatis.']);
+            return back()->withErrors(['video' => 'Storage is nearly full; new uploads are blocked until space is freed. Existing evidence is not deleted automatically.']);
         }
 
         $maxKb = intdiv(config('kitchen.upload.max_bytes'), 1024);
@@ -75,7 +75,7 @@ class VideoController extends Controller
             'recorded_timezone' => ['nullable', 'required_with:recorded_at', 'timezone:all'],
         ], [
             'video.max' => 'Ukuran file melebihi batas '.round(config('kitchen.upload.max_bytes') / 1048576).' MB.',
-            'video.extensions' => 'Format tidak didukung. Gunakan MP4, MOV, atau MKV.',
+            'video.extensions' => 'Unsupported format. Use MP4, MOV, or MKV.',
         ]);
 
         $file = $validated['video'];
@@ -99,7 +99,7 @@ class VideoController extends Controller
 
         ValidateVideoJob::dispatch($video->id);
         Audit::log('video.uploaded', $video, ['name' => $video->original_name, 'bytes' => $video->bytes]);
-        $this->toast('Video diunggah dan sedang divalidasi.');
+        $this->toast('Video uploaded and validating.');
 
         return redirect()->route('videos.show', $video);
     }
@@ -141,7 +141,7 @@ class VideoController extends Controller
             'recorded_timezone' => ['nullable', 'required_with:recorded_at', 'timezone:all'],
         ]));
         Audit::log('video.updated', $video, $video->getChanges());
-        $this->toast('Informasi rekaman disimpan.');
+        $this->toast('Recording details saved.');
 
         return back();
     }
@@ -149,7 +149,7 @@ class VideoController extends Controller
     public function preview(VideoAsset $video): BinaryFileResponse
     {
         $this->authorizePermission(Permission::ViewData, $video);
-        abort_if($video->preview_key === null, 404, 'Preview belum tersedia atau sudah kedaluwarsa.');
+        abort_if($video->preview_key === null, 404, 'Preview is not available or has expired.');
 
         return $this->privateFile($video->original_disk, $video->preview_key, 'video/mp4');
     }
@@ -166,13 +166,13 @@ class VideoController extends Controller
         $this->authorizePermission(Permission::ManageSources, $video);
 
         if (AnalysisRun::query()->where('video_asset_id', $video->id)->exists()) {
-            return back()->withErrors(['video' => 'Video sudah memiliki hasil analisis; file akan dihapus otomatis sesuai jadwal retensi.']);
+            return back()->withErrors(['video' => 'Video already has analysis results; the file will be deleted automatically per the retention schedule.']);
         }
 
         DB::transaction(fn () => $video->delete());
         Storage::disk($video->original_disk)->deleteDirectory($video->directory());
         Audit::log('video.deleted', $video);
-        $this->toast('Video dihapus.');
+        $this->toast('Video deleted.');
 
         return redirect()->route('videos.index');
     }
@@ -180,7 +180,7 @@ class VideoController extends Controller
     private function privateFile(string $disk, string $key, string $mime): BinaryFileResponse
     {
         $storage = Storage::disk($disk);
-        abort_unless($storage->exists($key), 404, 'File tidak ditemukan atau sudah kedaluwarsa.');
+        abort_unless($storage->exists($key), 404, 'File not found or expired.');
 
         return response()->file($storage->path($key), [
             'Content-Type' => $mime,

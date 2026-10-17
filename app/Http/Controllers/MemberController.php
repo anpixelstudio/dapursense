@@ -62,7 +62,7 @@ class MemberController extends Controller
             ->exists();
 
         if ($alreadyMember) {
-            return back()->withErrors(['email' => 'Email ini sudah menjadi anggota organisasi.']);
+            return back()->withErrors(['email' => 'This email is already an organization member.']);
         }
 
         $token = Str::random(48);
@@ -81,7 +81,7 @@ class MemberController extends Controller
 
         Audit::log('member.invited', $invitation, ['email' => $invitation->email, 'role' => $validated['role']]);
 
-        $this->toast('Undangan dibuat. Tautan: '.route('invitations.show', $token));
+        $this->toast('Invitation created. Link: '.route('invitations.show', $token));
 
         return back()->with('invitation_url', route('invitations.show', $token));
     }
@@ -92,7 +92,7 @@ class MemberController extends Controller
 
         $invitation->delete();
         Audit::log('member.invitation_revoked', $invitation);
-        $this->toast('Undangan dibatalkan.');
+        $this->toast('Invitation cancelled.');
 
         return back();
     }
@@ -118,14 +118,14 @@ class MemberController extends Controller
                 ->exists();
 
             if (! $otherOwners) {
-                return back()->withErrors(['role' => 'Organisasi harus memiliki minimal satu Owner aktif.']);
+                return back()->withErrors(['role' => 'The organization must have at least one active Owner.']);
             }
         }
 
         $before = ['role' => $membership->role->value, 'status' => $membership->status];
         $membership->update($validated);
         Audit::log('member.updated', $membership, ['before' => $before, 'after' => $validated]);
-        $this->toast('Keanggotaan diperbarui.');
+        $this->toast('Membership updated.');
 
         return back();
     }

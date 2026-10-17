@@ -30,7 +30,7 @@ test('stub chat refuses jailbreaks without calling through', function () {
         ->and($ai->dailyReport(['open_events' => 2], 'safety'))
         ->toContain('does not accept free-form instructions')
         ->and($ai->chatSop('Apa celemek wajib?', [], null, 'id'))
-        ->toContain('Mode demo')
+        ->toContain('Demo mode')
         ->and($ai->dailyReport(['open_events' => 1], 'operations', 'id'))
-        ->toContain('Rekomendasi');
+        ->toContain('Recommendations');
 });

@@ -37,14 +37,14 @@ class ValidateVideoJob implements ShouldQueue
 
             if ($probe['duration_ms'] > config('kitchen.upload.max_duration_ms')) {
                 throw new VideoRejected('too_long', sprintf(
-                    'Durasi video %d menit melebihi batas %d menit.',
+                    'Video duration %d minute(s) exceeds the %d minute limit.',
                     ceil($probe['duration_ms'] / 60000),
                     config('kitchen.upload.max_duration_ms') / 60000,
                 ));
             }
 
             if ($probe['width'] < 160 || $probe['height'] < 120) {
-                throw new VideoRejected('resolution_too_small', 'Resolusi video terlalu kecil untuk dianalisis.');
+                throw new VideoRejected('resolution_too_small', 'Video resolution is too small for analysis.');
             }
 
             $previewKey = $video->directory().'/preview.mp4';
@@ -68,7 +68,7 @@ class ValidateVideoJob implements ShouldQueue
             $video->update(['status' => VideoStatus::Rejected, 'error_code' => $e->errorCode, 'error_message' => $e->getMessage()]);
         } catch (Throwable $e) {
             Log::error('video.validation_failed', ['video_id' => $video->id, 'tenant_id' => $video->tenant_id, 'error' => $e->getMessage()]);
-            $video->update(['status' => VideoStatus::Rejected, 'error_code' => 'processing_failed', 'error_message' => 'Video gagal diproses. Coba unggah ulang.']);
+            $video->update(['status' => VideoStatus::Rejected, 'error_code' => 'processing_failed', 'error_message' => 'Video processing failed. Try uploading again.']);
         }
     }
 }

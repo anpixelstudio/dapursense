@@ -10,16 +10,12 @@ final class AiPrompts
 {
     public static function normalizeLocale(?string $locale): string
     {
-        $locale = strtolower(trim((string) $locale));
-
-        return in_array($locale, ['id', 'en'], true) ? $locale : 'en';
+        return 'en';
     }
 
     public static function languageRule(string $locale): string
     {
-        return self::normalizeLocale($locale) === 'id'
-            ? 'Always reply in clear Indonesian (Bahasa Indonesia).'
-            : 'Always reply in clear English.';
+        return 'Always reply in clear English.';
     }
 
     public static function formatRule(): string

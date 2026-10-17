@@ -4,11 +4,11 @@ import { EmptyState, Page } from '@/components/kitchen/ui';
 export default function NoOrganization() {
     return (
         <>
-            <Head title="Belum ada organisasi" />
+            <Head title="No organization" />
             <Page>
                 <EmptyState
-                    title="Anda belum tergabung di organisasi mana pun"
-                    description="Minta Owner organisasi mengirim undangan ke email Anda, lalu buka tautan undangan tersebut. Keanggotaan Anda mungkin juga telah dinonaktifkan."
+                    title="You are not in any organization yet"
+                    description="Ask an organization Owner to invite your email, then open the invitation link. Your membership may also have been deactivated."
                 />
             </Page>
         </>

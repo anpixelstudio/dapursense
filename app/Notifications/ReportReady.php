@@ -23,7 +23,7 @@ class ReportReady extends Notification
         return [
             'tenant_id' => $this->report->tenant_id,
             'kind' => 'report_ready',
-            'title' => $ready ? 'Laporan '.strtoupper($this->report->format).' siap diunduh' : 'Laporan gagal dibuat',
+            'title' => $ready ? strtoupper($this->report->format).' report ready to download' : 'Report generation failed',
             'body' => 'Report ID '.$this->report->id,
             'url' => route('reports.index', [], false),
         ];

@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ConfirmDialog } from '@/components/kitchen/confirm-dialog';
 import {
     EmptyState,
     Field,
@@ -53,11 +54,11 @@ type Props = {
 };
 
 const STATUS: Record<Report['status'], [string, Tone]> = {
-    QUEUED: ['Antre', 'neutral'],
-    RUNNING: ['Diproses', 'info'],
-    READY: ['Siap', 'success'],
-    FAILED: ['Gagal', 'danger'],
-    EXPIRED: ['Kedaluwarsa', 'neutral'],
+    QUEUED: ['Queued', 'neutral'],
+    RUNNING: ['Running', 'info'],
+    READY: ['Ready', 'success'],
+    FAILED: ['Failed', 'danger'],
+    EXPIRED: ['Expired', 'neutral'],
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -66,6 +67,9 @@ const weekAgo = () =>
 
 export default function Reports({ reports: list, schedules, options }: Props) {
     const { can, tenant } = useTenant();
+    const [pendingSchedule, setPendingSchedule] = useState<Schedule | null>(
+        null,
+    );
     const form = useForm({
         format: 'csv',
         from_date: weekAgo(),
@@ -100,16 +104,33 @@ export default function Reports({ reports: list, schedules, options }: Props) {
 
     return (
         <>
-            <Head title="Laporan" />
+            <Head title="Reports" />
+            <ConfirmDialog
+                open={pendingSchedule !== null}
+                onOpenChange={(open) => !open && setPendingSchedule(null)}
+                title="Delete this report schedule?"
+                description={`${pendingSchedule?.frequency === 'weekly' ? 'Weekly' : 'Daily'} ${pendingSchedule?.format.toUpperCase() ?? ''} reports will no longer be generated automatically.`}
+                confirmLabel="Delete schedule"
+                onConfirm={() => {
+                    if (!pendingSchedule) {
+                        return;
+                    }
+                    router.delete(
+                        reportSchedules.destroy(pendingSchedule.id).url,
+                        { preserveScroll: true },
+                    );
+                    setPendingSchedule(null);
+                }}
+            />
             <Page>
                 <PageHeader
-                    title="Laporan"
-                    description={`Laporan CSV/PDF dibuat di background dengan batas data saat diminta. Tanggal mengikuti zona waktu organisasi (${tenant?.timezone}).`}
+                    title="Reports"
+                    description={`CSV/PDF reports are built in the background with data limits at request time. Dates follow the organization timezone (${tenant?.timezone}).`}
                 />
 
                 {can('generate_reports') && (
                     <form
-                        className="grid gap-3 rounded-xl border p-4 md:grid-cols-4"
+                        className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.transform(
@@ -125,8 +146,9 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                             });
                         }}
                     >
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
                         <Field
-                            label="Dari tanggal"
+                            label="From date"
                             htmlFor="report-from"
                             error={form.errors.from_date}
                         >
@@ -140,7 +162,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                             />
                         </Field>
                         <Field
-                            label="Sampai tanggal"
+                            label="To date"
                             htmlFor="report-to"
                             error={form.errors.to_date}
                         >
@@ -153,7 +175,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 }
                             />
                         </Field>
-                        <Field label="Properti" htmlFor="report-property">
+                        <Field label="Property" htmlFor="report-property">
                             <NativeSelect
                                 id="report-property"
                                 value={form.data.property_id}
@@ -165,7 +187,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                     })
                                 }
                             >
-                                <option value="">Semua</option>
+                                <option value="">All</option>
                                 {options.properties.map((p) => (
                                     <option key={p.id} value={p.id}>
                                         {p.name}
@@ -173,7 +195,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 ))}
                             </NativeSelect>
                         </Field>
-                        <Field label="Dapur" htmlFor="report-kitchen">
+                        <Field label="Kitchen" htmlFor="report-kitchen">
                             <NativeSelect
                                 id="report-kitchen"
                                 value={form.data.kitchen_id}
@@ -181,7 +203,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                     form.setData('kitchen_id', e.target.value)
                                 }
                             >
-                                <option value="">Semua</option>
+                                <option value="">All</option>
                                 {options.kitchens
                                     .filter(
                                         (k) =>
@@ -196,7 +218,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                     ))}
                             </NativeSelect>
                         </Field>
-                        <Field label="Sumber" htmlFor="report-source">
+                        <Field label="Source" htmlFor="report-source">
                             <NativeSelect
                                 id="report-source"
                                 value={form.data.source_id}
@@ -204,7 +226,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                     form.setData('source_id', e.target.value)
                                 }
                             >
-                                <option value="">Semua</option>
+                                <option value="">All</option>
                                 {options.sources.map((s) => (
                                     <option key={s.id} value={s.id}>
                                         {s.name}
@@ -212,7 +234,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 ))}
                             </NativeSelect>
                         </Field>
-                        <Field label="Status review" htmlFor="report-status">
+                        <Field label="Review status" htmlFor="report-status">
                             <NativeSelect
                                 id="report-status"
                                 value={form.data.review_status}
@@ -223,7 +245,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                     )
                                 }
                             >
-                                <option value="">Semua</option>
+                                <option value="">All</option>
                                 {options.review_statuses.map((s) => (
                                     <option key={s.value} value={s.value}>
                                         {s.label}
@@ -243,7 +265,8 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 <option value="pdf">PDF</option>
                             </NativeSelect>
                         </Field>
-                        <div className="flex flex-col justify-end gap-2">
+                        </div>
+                        <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                             <label className="flex items-center gap-2 text-sm">
                                 <input
                                     type="checkbox"
@@ -255,29 +278,30 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                         )
                                     }
                                 />
-                                Sertakan hasil simulasi
+                                Include simulation results
                             </label>
                             <Button
+                                className="h-9 shrink-0 sm:min-w-36"
                                 disabled={form.processing}
                                 data-test="generate-report"
                             >
-                                Buat laporan
+                                Generate report
                             </Button>
                         </div>
                     </form>
                 )}
 
                 {list.length === 0 ? (
-                    <EmptyState title="Belum ada laporan" />
+                    <EmptyState title="No reports yet" />
                 ) : (
                     <Table>
                         <thead>
                             <tr>
-                                <Th>Dibuat</Th>
-                                <Th>Periode</Th>
+                                <Th>Created</Th>
+                                <Th>Period</Th>
                                 <Th>Format</Th>
                                 <Th>Status</Th>
-                                <Th>Oleh</Th>
+                                <Th>By</Th>
                                 <Th />
                             </tr>
                         </thead>
@@ -295,7 +319,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                         {String(r.filters.to_date)}
                                         {r.filters.include_simulation ? (
                                             <span className="ml-2 text-xs text-violet-700">
-                                                + simulasi
+                                                + simulation
                                             </span>
                                         ) : null}
                                     </Td>
@@ -310,7 +334,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                             </p>
                                         )}
                                     </Td>
-                                    <Td>{r.requester?.name ?? 'Jadwal'}</Td>
+                                    <Td>{r.requester?.name ?? 'Schedule'}</Td>
                                     <Td className="text-right">
                                         {r.status === 'READY' &&
                                             can('download_reports') && (
@@ -326,7 +350,7 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                                             ).url
                                                         }
                                                     >
-                                                        Unduh
+                                                        Download
                                                     </a>
                                                 </Button>
                                             )}
@@ -338,10 +362,10 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                 )}
 
                 <section className="space-y-3">
-                    <h2 className="font-medium">Laporan terjadwal</h2>
+                    <h2 className="font-medium">Scheduled reports</h2>
                     {can('generate_reports') && (
                         <form
-                            className="flex flex-wrap items-end gap-3 rounded-xl border p-4"
+                            className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 scheduleForm.post(reportSchedules.store().url, {
@@ -349,64 +373,69 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 });
                             }}
                         >
-                            <Field
-                                label="Frekuensi"
-                                htmlFor="schedule-frequency"
-                            >
-                                <NativeSelect
-                                    id="schedule-frequency"
-                                    className="w-40"
-                                    value={scheduleForm.data.frequency}
-                                    onChange={(e) =>
-                                        scheduleForm.setData(
-                                            'frequency',
-                                            e.target.value,
-                                        )
-                                    }
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
+                                <Field
+                                    label="Frequency"
+                                    htmlFor="schedule-frequency"
                                 >
-                                    <option value="daily">Harian</option>
-                                    <option value="weekly">Mingguan</option>
-                                </NativeSelect>
-                            </Field>
-                            <Field label="Format" htmlFor="schedule-format">
-                                <NativeSelect
-                                    id="schedule-format"
-                                    className="w-28"
-                                    value={scheduleForm.data.format}
-                                    onChange={(e) =>
-                                        scheduleForm.setData(
-                                            'format',
-                                            e.target.value,
-                                        )
-                                    }
+                                    <NativeSelect
+                                        id="schedule-frequency"
+                                        value={scheduleForm.data.frequency}
+                                        onChange={(e) =>
+                                            scheduleForm.setData(
+                                                'frequency',
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                    </NativeSelect>
+                                </Field>
+                                <Field label="Format" htmlFor="schedule-format">
+                                    <NativeSelect
+                                        id="schedule-format"
+                                        value={scheduleForm.data.format}
+                                        onChange={(e) =>
+                                            scheduleForm.setData(
+                                                'format',
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        <option value="csv">CSV</option>
+                                        <option value="pdf">PDF</option>
+                                    </NativeSelect>
+                                </Field>
+                            </div>
+                            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            scheduleForm.data.include_simulation
+                                        }
+                                        onChange={(e) =>
+                                            scheduleForm.setData(
+                                                'include_simulation',
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                    Include simulation
+                                </label>
+                                <Button
+                                    className="h-9 shrink-0"
+                                    disabled={scheduleForm.processing}
                                 >
-                                    <option value="csv">CSV</option>
-                                    <option value="pdf">PDF</option>
-                                </NativeSelect>
-                            </Field>
-                            <label className="flex h-9 items-center gap-2 text-sm">
-                                <input
-                                    type="checkbox"
-                                    checked={
-                                        scheduleForm.data.include_simulation
-                                    }
-                                    onChange={(e) =>
-                                        scheduleForm.setData(
-                                            'include_simulation',
-                                            e.target.checked,
-                                        )
-                                    }
-                                />
-                                Sertakan simulasi
-                            </label>
-                            <Button disabled={scheduleForm.processing}>
-                                Tambah jadwal
-                            </Button>
+                                    Add schedule
+                                </Button>
+                            </div>
                         </form>
                     )}
                     {schedules.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                            Belum ada jadwal.
+                            No schedules yet.
                         </p>
                     ) : (
                         <ul className="divide-y rounded-xl border">
@@ -417,12 +446,12 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                 >
                                     <span className="font-medium">
                                         {s.frequency === 'daily'
-                                            ? 'Harian'
-                                            : 'Mingguan'}{' '}
+                                            ? 'Daily'
+                                            : 'Weekly'}{' '}
                                         · {s.format.toUpperCase()}
                                     </span>
                                     <span className="text-muted-foreground">
-                                        berikutnya{' '}
+                                        next{' '}
                                         {formatDateTime(
                                             s.next_run_at,
                                             s.timezone,
@@ -434,14 +463,9 @@ export default function Reports({ reports: list, schedules, options }: Props) {
                                             className="ml-auto"
                                             variant="ghost"
                                             size="icon"
-                                            title="Hapus jadwal"
+                                            title="Delete schedule"
                                             onClick={() =>
-                                                router.delete(
-                                                    reportSchedules.destroy(
-                                                        s.id,
-                                                    ).url,
-                                                    { preserveScroll: true },
-                                                )
+                                                setPendingSchedule(s)
                                             }
                                         >
                                             <Trash2 />
@@ -458,5 +482,5 @@ export default function Reports({ reports: list, schedules, options }: Props) {
 }
 
 Reports.layout = {
-    breadcrumbs: [{ title: 'Laporan', href: reports.index() }],
+    breadcrumbs: [{ title: 'Reports', href: reports.index() }],
 };

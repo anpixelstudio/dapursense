@@ -111,7 +111,7 @@ class EventController extends Controller
         } catch (ReviewConflict $conflict) {
             $payload = [
                 'error' => 'revision_conflict',
-                'message' => 'Kejadian sudah diubah reviewer lain. Periksa keputusan terbaru sebelum melanjutkan.',
+                'message' => 'Another reviewer already changed this event. Check the latest decision before continuing.',
                 'current' => [
                     'review_status' => $conflict->current->review_status->value,
                     'revision' => $conflict->current->revision,
@@ -126,7 +126,7 @@ class EventController extends Controller
             return back()->withErrors(['expected_revision' => $payload['message']]);
         }
 
-        $this->toast('Keputusan review disimpan.');
+        $this->toast('Review decision saved.');
 
         return back();
     }
@@ -138,7 +138,7 @@ class EventController extends Controller
 
         $event->update(['evidence_hold' => $validated['hold']]);
         Audit::log($validated['hold'] ? 'event.hold_set' : 'event.hold_released', $event);
-        $this->toast($validated['hold'] ? 'Bukti ditahan dari penghapusan otomatis.' : 'Penahanan bukti dilepas.');
+        $this->toast($validated['hold'] ? 'Evidence held from automatic deletion.' : 'Evidence hold released.');
 
         return back();
     }
@@ -147,10 +147,10 @@ class EventController extends Controller
     {
         $this->authorizePermission(Permission::ViewData, $event);
         abort_unless($media->event_id === $event->id, 404);
-        abort_unless($media->state === 'READY' && $media->key, 404, 'Bukti tidak tersedia: '.($media->error_code ?? strtolower($media->state)));
+        abort_unless($media->state === 'READY' && $media->key, 404, 'Evidence unavailable: '.($media->error_code ?? strtolower($media->state)));
 
         $disk = Storage::disk($media->disk);
-        abort_unless($disk->exists($media->key), 404, 'File bukti sudah tidak ada.');
+        abort_unless($disk->exists($media->key), 404, 'Evidence file no longer exists.');
 
         $mime = match ($media->kind) {
             'snapshot' => 'image/jpeg',

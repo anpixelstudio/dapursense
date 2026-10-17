@@ -38,7 +38,7 @@ class ResolveTenantContext
 
         if ($mode === 'required' && ! $this->context->has()) {
             if ($request->expectsJson()) {
-                abort(403, 'Tidak ada organisasi aktif untuk akun ini.');
+                abort(403, 'No active organization for this account.');
             }
 
             return redirect()->route('organizations.none');

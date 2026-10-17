@@ -8,12 +8,12 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('devices:check')]
-#[Description('Cek uptime perangkat yang sudah jatuh tempo (TCP, heartbeat, komponen server)')]
+#[Description('Check due device uptime (TCP, heartbeat, server components)')]
 class DeviceCheck extends Command
 {
     public function handle(DeviceMonitor $monitor): int
     {
-        $this->info('Perangkat dicek: '.$monitor->checkDue());
+        $this->info('Devices checked: '.$monitor->checkDue());
 
         return self::SUCCESS;
     }

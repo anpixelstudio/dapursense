@@ -198,4 +198,16 @@ def make_detector(model: dict, duration_ms: int, zones: list[dict], min_person_s
         return YoloxPersonDetector(resolve_artifact(model, models_dir), min_person_score)
     if runtime == "onnx-wholebody" and models_dir is not None:
         return YoloxPersonDetector(resolve_artifact(model, models_dir), min_person_score, input_size=640, letterbox=False)
+    if runtime == "onnx-kitchen-ppe" and models_dir is not None:
+        from .kitchen_ppe import KitchenPpeDetector
+
+        companion = (model.get("capabilities") or {}).get("companion_person") or {}
+        if not companion.get("artifact_key") or not companion.get("sha256"):
+            raise ValueError("model_unsupported:companion_person hilang untuk onnx-kitchen-ppe")
+        person_path = resolve_artifact(
+            {"artifact_key": companion["artifact_key"], "sha256": companion["sha256"], "name": model.get("name")},
+            models_dir,
+        )
+        ppe_path = resolve_artifact(model, models_dir)
+        return KitchenPpeDetector(person_path, ppe_path, min_person_score)
     raise ValueError(f"model_unsupported:{runtime}")

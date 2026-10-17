@@ -83,7 +83,7 @@ class RunCallbackController extends Controller
 
         $mediaKey = function (string $attribute, mixed $value, \Closure $fail) use ($prefix) {
             if ($value !== null && (! str_starts_with($value, $prefix) || str_contains($value, '..'))) {
-                $fail('Media key harus berada di direktori run.');
+                $fail('Media key must be under the run directory.');
             }
         };
 

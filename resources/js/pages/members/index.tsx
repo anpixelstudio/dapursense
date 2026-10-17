@@ -46,17 +46,17 @@ export default function Members({ members: list, invitations, roles }: Props) {
 
     return (
         <>
-            <Head title="Anggota" />
+            <Head title="Members" />
             <Page>
                 <PageHeader
-                    title="Anggota"
-                    description="Akses dibatasi per peran. Owner mengelola anggota dan sistem; Supervisor mengatur sumber, aturan, analisis, dan meninjau anomali; Operator upload, playback, dan melihat event; Viewer hanya melihat dan mengunduh laporan."
+                    title="Members"
+                    description="Access is role-based. Owners manage members and system; Supervisors manage sources, rules, analysis, and review anomalies; Operators upload, playback, and view events; Viewers read-only and download reports."
                 />
                 <PageErrors keys={['role']} />
 
                 {canManage && (
                     <form
-                        className="flex flex-wrap items-end gap-3 rounded-xl border p-4"
+                        className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.post(members.invite().url, {
@@ -65,60 +65,66 @@ export default function Members({ members: list, invitations, roles }: Props) {
                             });
                         }}
                     >
-                        <Field
-                            label="Email"
-                            htmlFor="invite-email"
-                            error={form.errors.email}
-                        >
-                            <Input
-                                id="invite-email"
-                                type="email"
-                                className="w-72"
-                                value={form.data.email}
-                                onChange={(e) =>
-                                    form.setData('email', e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Field
-                            label="Peran"
-                            htmlFor="invite-role"
-                            error={form.errors.role}
-                        >
-                            <NativeSelect
-                                id="invite-role"
-                                className="w-40"
-                                value={form.data.role}
-                                onChange={(e) =>
-                                    form.setData('role', e.target.value)
-                                }
+                        <div className="grid gap-4 sm:grid-cols-2 items-start">
+                            <Field
+                                label="Email"
+                                htmlFor="invite-email"
+                                error={form.errors.email}
                             >
-                                {roles
-                                    .filter((r) => r.value !== 'owner')
-                                    .map((r) => (
-                                        <option key={r.value} value={r.value}>
-                                            {r.label}
-                                        </option>
-                                    ))}
-                            </NativeSelect>
-                        </Field>
-                        <Button
-                            disabled={form.processing}
-                            data-test="invite-member"
-                        >
-                            Kirim undangan
-                        </Button>
+                                <Input
+                                    id="invite-email"
+                                    type="email"
+                                    value={form.data.email}
+                                    onChange={(e) =>
+                                        form.setData('email', e.target.value)
+                                    }
+                                />
+                            </Field>
+                            <Field
+                                label="Role"
+                                htmlFor="invite-role"
+                                error={form.errors.role}
+                            >
+                                <NativeSelect
+                                    id="invite-role"
+                                    value={form.data.role}
+                                    onChange={(e) =>
+                                        form.setData('role', e.target.value)
+                                    }
+                                >
+                                    {roles
+                                        .filter((r) => r.value !== 'owner')
+                                        .map((r) => (
+                                            <option
+                                                key={r.value}
+                                                value={r.value}
+                                            >
+                                                {r.label}
+                                            </option>
+                                        ))}
+                                </NativeSelect>
+                            </Field>
+                        </div>
+                        <div className="flex justify-end border-t pt-4">
+                            <Button
+                                className="h-9"
+                                disabled={form.processing}
+                                data-test="invite-member"
+                            >
+                                Send invitation
+                            </Button>
+                        </div>
                     </form>
                 )}
 
                 <Table>
                     <thead>
                         <tr>
-                            <Th>Nama</Th>
+                            <Th>Name</Th>
                             <Th>Email</Th>
-                            <Th>Peran</Th>
+                            <Th>Role</Th>
                             <Th>Status</Th>
-                            <Th>Bergabung</Th>
+                            <Th>Joined</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -128,7 +134,7 @@ export default function Members({ members: list, invitations, roles }: Props) {
                                     {m.name}
                                     {m.email === auth.user.email && (
                                         <span className="ml-1 text-xs text-muted-foreground">
-                                            (Anda)
+                                            (you)
                                         </span>
                                     )}
                                 </Td>
@@ -167,8 +173,8 @@ export default function Members({ members: list, invitations, roles }: Props) {
                                             }
                                         >
                                             {m.status === 'active'
-                                                ? 'Aktif'
-                                                : 'Ditangguhkan'}
+                                                ? 'Active'
+                                                : 'Suspended'}
                                         </Pill>
                                         {canManage && (
                                             <Button
@@ -185,8 +191,8 @@ export default function Members({ members: list, invitations, roles }: Props) {
                                                 }
                                             >
                                                 {m.status === 'active'
-                                                    ? 'Tangguhkan'
-                                                    : 'Aktifkan'}
+                                                    ? 'Suspend'
+                                                    : 'Activate'}
                                             </Button>
                                         )}
                                     </div>
@@ -204,7 +210,7 @@ export default function Members({ members: list, invitations, roles }: Props) {
 
                 {invitations.length > 0 && (
                     <section className="space-y-2">
-                        <h2 className="font-medium">Undangan tertunda</h2>
+                        <h2 className="font-medium">Pending invitations</h2>
                         <ul className="divide-y rounded-xl border">
                             {invitations.map((i) => (
                                 <li
@@ -216,7 +222,7 @@ export default function Members({ members: list, invitations, roles }: Props) {
                                     </span>
                                     <span className="text-muted-foreground">
                                         {ROLE_LABELS[i.role] ?? i.role} ·
-                                        berlaku sampai{' '}
+                                        valid until{' '}
                                         {formatDateTime(
                                             i.expires_at,
                                             tenant?.timezone,
@@ -227,7 +233,7 @@ export default function Members({ members: list, invitations, roles }: Props) {
                                             className="ml-auto"
                                             variant="ghost"
                                             size="icon"
-                                            title="Batalkan undangan"
+                                            title="Cancel invitation"
                                             onClick={() =>
                                                 router.delete(
                                                     members.invitations.destroy(
@@ -251,5 +257,5 @@ export default function Members({ members: list, invitations, roles }: Props) {
 }
 
 Members.layout = {
-    breadcrumbs: [{ title: 'Anggota', href: members.index() }],
+    breadcrumbs: [{ title: 'Members', href: members.index() }],
 };

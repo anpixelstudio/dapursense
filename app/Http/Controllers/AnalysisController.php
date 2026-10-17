@@ -35,11 +35,11 @@ class AnalysisController extends Controller
         ]);
 
         $model = AiModel::query()->availableTo($tenantId)->find($validated['model_id']);
-        abort_if($model === null, 404, 'Model tidak tersedia untuk organisasi ini.');
+        abort_if($model === null, 404, 'Model is not available for this organization.');
 
         $run = $service->start($video, $model, RuleSet::query()->with('activeRevision')->findOrFail($validated['rule_set_id']), $validated['mode'], $request->user());
         Audit::log('analysis.requested', $run, ['mode' => $run->mode, 'model' => $model->name.' '.$model->version]);
-        $this->toast('Analisis masuk antrean.');
+        $this->toast('Analysis queued.');
 
         return redirect()->route('analyses.show', $run);
     }
@@ -85,12 +85,12 @@ class AnalysisController extends Controller
         $this->authorizePermission(Permission::RunAnalysis, $run);
 
         if (! $run->status->isActive()) {
-            return back()->withErrors(['run' => 'Run sudah selesai dan tidak dapat dibatalkan.']);
+            return back()->withErrors(['run' => 'Run is already finished and cannot be cancelled.']);
         }
 
         $service->cancel($run);
         Audit::log('analysis.cancel_requested', $run);
-        $this->toast('Pembatalan dikirim ke worker.');
+        $this->toast('Cancellation sent to worker.');
 
         return back();
     }

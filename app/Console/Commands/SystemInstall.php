@@ -22,13 +22,13 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 #[Signature('system:install
-    {--demo : Buat lokasi dan template aturan bertanda demo}
-    {--non-interactive : Jangan bertanya; semua input dari opsi}
-    {--admin-email= : Email owner awal}
-    {--admin-name=Owner : Nama owner awal}
-    {--organization=Organisasi Utama : Nama organisasi owner awal}
-    {--admin-password-file= : File berisi password owner (izin 0600 atau 0400)}')]
-#[Description('Instal aplikasi: preflight, migration, seed idempotent, owner awal, verifikasi dan laporan instalasi')]
+    {--demo : Create demo location and rule template}
+    {--non-interactive : Non-interactive; all input from options}
+    {--admin-email= : Initial owner email}
+    {--admin-name=Owner : Initial owner name}
+    {--organization=Primary Organization : Initial owner organization name}
+    {--admin-password-file= : File containing owner password (mode 0600 or 0400)}')]
+#[Description('Install application: preflight, migration, idempotent seed, initial owner, verify and install report')]
 class SystemInstall extends SystemOperation
 {
     protected function operation(): string
@@ -44,7 +44,7 @@ class SystemInstall extends SystemOperation
             $installed = SystemRelease::query()->latest('installed_at')->first();
 
             if ($installed && $installed->app_version !== $target) {
-                throw new OperationFailed('upgrade_required', "Database berisi versi {$installed->app_version}; jalankan php artisan system:upgrade untuk {$target}.", self::EXIT_UPGRADE_REQUIRED);
+                throw new OperationFailed('upgrade_required', "Database contains version {$installed->app_version}; run php artisan system:upgrade for {$target}.", self::EXIT_UPGRADE_REQUIRED);
             }
         }
 
@@ -81,7 +81,7 @@ class SystemInstall extends SystemOperation
 
         if (! $email) {
             if ($this->option('non-interactive')) {
-                throw new OperationFailed('owner_required', 'Mode non-interactive membutuhkan --admin-email pada instalasi pertama.', self::EXIT_PREFLIGHT);
+                throw new OperationFailed('owner_required', 'Non-interactive mode requires --admin-email on first install.', self::EXIT_PREFLIGHT);
             }
             $email = $this->ask('Email owner');
         }
@@ -89,7 +89,7 @@ class SystemInstall extends SystemOperation
         $email = strtolower(trim((string) $email));
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new OperationFailed('owner_invalid', 'Email owner tidak valid.', self::EXIT_PREFLIGHT);
+            throw new OperationFailed('owner_invalid', 'Owner email is invalid.', self::EXIT_PREFLIGHT);
         }
 
         $user = User::query()->where('email', $email)->first();
@@ -117,18 +117,18 @@ class SystemInstall extends SystemOperation
     {
         if ($file = $this->option('admin-password-file')) {
             if (! is_file($file) || (fileperms($file) & 0077) !== 0) {
-                throw new OperationFailed('password_file_insecure', 'File password harus ada dan hanya dapat dibaca pemiliknya (chmod 600).', self::EXIT_PREFLIGHT);
+                throw new OperationFailed('password_file_insecure', 'Password file must exist and be owner-readable only (chmod 600).', self::EXIT_PREFLIGHT);
             }
 
             $password = trim((string) file_get_contents($file));
         } elseif ($this->option('non-interactive')) {
-            throw new OperationFailed('password_required', 'Mode non-interactive membutuhkan --admin-password-file.', self::EXIT_PREFLIGHT);
+            throw new OperationFailed('password_required', 'Non-interactive mode requires --admin-password-file.', self::EXIT_PREFLIGHT);
         } else {
-            $password = (string) $this->secret('Password owner (tidak ditampilkan)');
+            $password = (string) $this->secret('Owner password (hidden)');
         }
 
         if (strlen($password) < 8) {
-            throw new OperationFailed('password_weak', 'Password owner minimal 8 karakter.', self::EXIT_PREFLIGHT);
+            throw new OperationFailed('password_weak', 'Owner password must be at least 8 characters.', self::EXIT_PREFLIGHT);
         }
 
         return $password;
@@ -145,12 +145,12 @@ class SystemInstall extends SystemOperation
 
         $tenantId = $membership->tenant_id;
         $property = Property::query()->withoutGlobalScopes()->firstOrCreate(
-            ['tenant_id' => $tenantId, 'name' => 'Properti Demo'],
-            ['address' => 'Data demo', 'timezone' => 'Asia/Jakarta'],
+            ['tenant_id' => $tenantId, 'name' => 'Demo Property'],
+            ['address' => 'Demo data', 'timezone' => 'Asia/Jakarta'],
         );
         $kitchen = Kitchen::query()->withoutGlobalScopes()->firstOrCreate(
-            ['tenant_id' => $tenantId, 'property_id' => $property->id, 'name' => 'Dapur Demo'],
-            ['description' => 'Dibuat oleh system:install --demo'],
+            ['tenant_id' => $tenantId, 'property_id' => $property->id, 'name' => 'Demo Kitchen'],
+            ['description' => 'Created by system:install --demo'],
         );
         MediaSource::query()->withoutGlobalScopes()->firstOrCreate(
             ['tenant_id' => $tenantId, 'kitchen_id' => $kitchen->id, 'name' => 'Upload Demo'],
@@ -165,13 +165,13 @@ class SystemInstall extends SystemOperation
             ? $status->modifiedMigrations($release) : [];
 
         if ($modified !== []) {
-            throw new OperationFailed('migration_modified', 'Migration yang sudah terpasang berubah: '.implode(', ', $modified));
+            throw new OperationFailed('migration_modified', 'Installed migration(s) changed: '.implode(', ', $modified));
         }
 
         try {
             Queue::connection()->size();
         } catch (Throwable $e) {
-            throw new OperationFailed('queue_unavailable', 'Queue tidak dapat diakses: '.$e->getMessage());
+            throw new OperationFailed('queue_unavailable', 'Queue is unavailable: '.$e->getMessage());
         }
 
         $health = $status->collect();
@@ -179,7 +179,7 @@ class SystemInstall extends SystemOperation
         $this->report['worker'] = $health['services']['worker'] ? 'healthy' : 'unreachable';
 
         if (! $health['analysis_ready']) {
-            $this->components->warn('Worker AI belum dapat dihubungi: dashboard siap, analysis_ready=false.');
+            $this->components->warn('AI worker unreachable: dashboard is ready, analysis_ready=false.');
         }
 
         Artisan::call('optimize:clear');

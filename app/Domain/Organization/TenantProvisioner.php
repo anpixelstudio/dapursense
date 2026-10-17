@@ -29,7 +29,7 @@ class TenantProvisioner
                 'role' => Role::Owner,
             ]);
 
-            $ruleSet = RuleSet::query()->create(['tenant_id' => $tenant->id, 'name' => 'SOP Dasar Dapur']);
+            $ruleSet = RuleSet::query()->create(['tenant_id' => $tenant->id, 'name' => 'Kitchen SOP baseline']);
             $this->rules->publish($ruleSet, SopTemplate::defaultConfig(), $owner);
 
             return $tenant;
@@ -38,7 +38,7 @@ class TenantProvisioner
 
     private function uniqueSlug(string $name): string
     {
-        $base = Str::slug($name) ?: 'organisasi';
+        $base = Str::slug($name) ?: 'organization';
         $slug = $base;
 
         while (Tenant::query()->where('slug', $slug)->exists()) {

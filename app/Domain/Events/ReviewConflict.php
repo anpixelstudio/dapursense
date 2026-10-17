@@ -9,6 +9,6 @@ class ReviewConflict extends RuntimeException
 {
     public function __construct(public readonly AnomalyEvent $current)
     {
-        parent::__construct('Kejadian sudah diubah reviewer lain.');
+        parent::__construct('Another reviewer already changed this event.');
     }
 }

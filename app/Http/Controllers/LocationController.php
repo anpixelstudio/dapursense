@@ -34,7 +34,7 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations);
         $property = Property::query()->create($this->propertyRules($request));
         Audit::log('property.created', $property);
-        $this->toast('Properti ditambahkan.');
+        $this->toast('Property added.');
 
         return back();
     }
@@ -44,7 +44,7 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations, $property);
         $property->update($this->propertyRules($request));
         Audit::log('property.updated', $property, $property->getChanges());
-        $this->toast('Properti diperbarui.');
+        $this->toast('Property updated.');
 
         return back();
     }
@@ -54,12 +54,12 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations, $property);
 
         if ($property->kitchens()->exists()) {
-            return back()->withErrors(['property' => 'Hapus dapur di properti ini terlebih dahulu.']);
+            return back()->withErrors(['property' => 'Remove kitchens on this property first.']);
         }
 
         $property->delete();
         Audit::log('property.deleted', $property);
-        $this->toast('Properti dihapus.');
+        $this->toast('Property removed.');
 
         return back();
     }
@@ -69,7 +69,7 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations);
         $kitchen = Kitchen::query()->create($this->kitchenRules($request));
         Audit::log('kitchen.created', $kitchen);
-        $this->toast('Dapur ditambahkan.');
+        $this->toast('Kitchen added.');
 
         return back();
     }
@@ -79,7 +79,7 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations, $kitchen);
         $kitchen->update($this->kitchenRules($request));
         Audit::log('kitchen.updated', $kitchen, $kitchen->getChanges());
-        $this->toast('Dapur diperbarui.');
+        $this->toast('Kitchen updated.');
 
         return back();
     }
@@ -89,17 +89,17 @@ class LocationController extends Controller
         $this->authorizePermission(Permission::ManageLocations, $kitchen);
 
         if (MediaSource::query()->where('kitchen_id', $kitchen->id)->exists()) {
-            return back()->withErrors(['kitchen' => 'Dapur masih memiliki sumber video.']);
+            return back()->withErrors(['kitchen' => 'Kitchen still has video sources.']);
         }
 
         try {
             $kitchen->delete();
         } catch (QueryException) {
-            return back()->withErrors(['kitchen' => 'Dapur masih direferensikan data lain.']);
+            return back()->withErrors(['kitchen' => 'Kitchen is still referenced by other data.']);
         }
 
         Audit::log('kitchen.deleted', $kitchen);
-        $this->toast('Dapur dihapus.');
+        $this->toast('Kitchen removed.');
 
         return back();
     }

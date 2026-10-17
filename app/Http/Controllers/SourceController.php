@@ -38,11 +38,11 @@ class SourceController extends Controller
             'kitchen_id' => ['required', 'uuid', Rule::exists('kitchens', 'id')->where('tenant_id', $this->tenantId())],
             'name' => ['required', 'string', 'max:120'],
             'type' => ['required', 'in:upload'],
-        ], ['type.in' => 'Sumber RTSP tersedia pada tahap P1; gunakan upload video.']);
+        ], ['type.in' => 'RTSP sources are planned for phase P1; use video upload for now.']);
 
         $source = MediaSource::query()->create($validated + ['status' => 'active']);
         Audit::log('source.created', $source);
-        $this->toast('Sumber video ditambahkan.');
+        $this->toast('Video source added.');
 
         return back();
     }
@@ -56,7 +56,7 @@ class SourceController extends Controller
             'status' => ['required', 'in:active,inactive'],
         ]));
         Audit::log('source.updated', $source, $source->getChanges());
-        $this->toast('Sumber video diperbarui.');
+        $this->toast('Video source updated.');
 
         return back();
     }
@@ -69,13 +69,13 @@ class SourceController extends Controller
             || AnalysisRun::query()->where('source_id', $source->id)->exists();
 
         if ($hasEvidence) {
-            return back()->withErrors(['source' => 'Sumber memiliki video atau hasil analisis; nonaktifkan saja agar bukti tetap tersimpan.']);
+            return back()->withErrors(['source' => 'Source has videos or analysis results; deactivate it instead to keep evidence.']);
         }
 
         $source->zones()->delete();
         $source->delete();
         Audit::log('source.deleted', $source);
-        $this->toast('Sumber video dihapus.');
+        $this->toast('Video source removed.');
 
         return back();
     }

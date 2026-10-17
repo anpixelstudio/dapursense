@@ -55,23 +55,24 @@ export default function Activities({
 
     return (
         <>
-            <Head title="Aktivitas" />
+            <Head title="Activities" />
             <Page>
                 <PageHeader
-                    title="Aktivitas"
-                    description="Interval keberadaan orang di setiap zona. Label dihitung dari posisi kaki terhadap polygon zona, bukan dari pengenalan aktivitas memasak."
+                    title="Activities"
+                    description="Person presence intervals in each zone. Labels come from foot position against zone polygons, not cooking-activity recognition."
                 />
 
                 {runs.length === 0 ? (
                     <EmptyState
-                        title="Belum ada analisis selesai"
-                        description="Aktivitas muncul setelah analisis video selesai."
+                        title="No completed analyses yet"
+                        description="Activities appear after video analysis completes."
                     />
                 ) : (
                     <>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
                             <NativeSelect
-                                className="w-80"
+                                className="h-9 w-full min-w-0 lg:col-span-2"
+                                aria-label="Analysis run"
                                 value={selectedRunId ?? ''}
                                 onChange={(e) =>
                                     apply({
@@ -88,13 +89,14 @@ export default function Activities({
                                             tenant?.timezone,
                                         )}
                                         {r.mode === 'simulation'
-                                            ? ' (simulasi)'
+                                            ? ' (simulation)'
                                             : ''}
                                     </option>
                                 ))}
                             </NativeSelect>
                             <NativeSelect
-                                className="w-52"
+                                className="h-9 w-full min-w-0"
+                                aria-label="Activity type"
                                 value={filters.label ?? ''}
                                 onChange={(e) =>
                                     apply({
@@ -102,7 +104,7 @@ export default function Activities({
                                     })
                                 }
                             >
-                                <option value="">Semua aktivitas</option>
+                                <option value="">All activities</option>
                                 {labels.map((l) => (
                                     <option key={l} value={l}>
                                         {activityLabel(l)}
@@ -110,7 +112,8 @@ export default function Activities({
                                 ))}
                             </NativeSelect>
                             <NativeSelect
-                                className="w-44"
+                                className="h-9 w-full min-w-0"
+                                aria-label="Zone type"
                                 value={filters.zone_type ?? ''}
                                 onChange={(e) =>
                                     apply({
@@ -118,22 +121,24 @@ export default function Activities({
                                     })
                                 }
                             >
-                                <option value="">Semua jenis zona</option>
+                                <option value="">All zone types</option>
                                 {ZONE_TYPES.map((z) => (
                                     <option key={z.value} value={z.value}>
                                         {z.label}
                                     </option>
                                 ))}
                             </NativeSelect>
-                            {selectedRunId && (
+                        </div>
+                        {selectedRunId && (
+                            <p className="text-sm">
                                 <Link
                                     href={analyses.show(selectedRunId)}
-                                    className="self-center text-sm text-muted-foreground hover:underline"
+                                    className="text-muted-foreground hover:underline"
                                 >
-                                    Buka timeline
+                                    Open analysis timeline
                                 </Link>
-                            )}
-                        </div>
+                            </p>
+                        )}
 
                         {runs.find((r) => r.id === selectedRunId)?.mode ===
                             'simulation' && (
@@ -142,16 +147,16 @@ export default function Activities({
                                 data-test="simulation-note"
                             >
                                 <SimulationBadge />
-                                Orang dan aktivitas di bawah ini dibuat oleh
-                                simulator untuk demo alur, bukan hasil deteksi
-                                dari video.
+                                People and activities below were generated by the
+                                simulator for workflow demos, not detection
+                                results from video.
                             </p>
                         )}
 
                         {totals.length > 0 && (
                             <div className="space-y-2 rounded-xl border p-4">
                                 <p className="text-sm font-medium">
-                                    Total durasi per aktivitas (semua orang)
+                                    Total duration by activity (all people)
                                 </p>
                                 <div className="flex h-4 overflow-hidden rounded">
                                     {totals.map((t) => (
@@ -200,18 +205,18 @@ export default function Activities({
                         <Table>
                             <thead>
                                 <tr>
-                                    <Th>Orang</Th>
-                                    <Th>Aktivitas</Th>
-                                    <Th>Zona</Th>
-                                    <Th>Mulai</Th>
-                                    <Th>Selesai</Th>
-                                    <Th>Durasi</Th>
+                                    <Th>People</Th>
+                                    <Th>Activity</Th>
+                                    <Th>Zone</Th>
+                                    <Th>Started</Th>
+                                    <Th>Ended</Th>
+                                    <Th>Duration</Th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {segments.data.map((s) => (
                                     <tr key={s.id}>
-                                        <Td>Orang {s.track?.track_key}</Td>
+                                        <Td>Person {s.track?.track_key}</Td>
                                         <Td>{activityLabel(s.label)}</Td>
                                         <Td>{s.zone?.name ?? '-'}</Td>
                                         <Td className="font-mono">
@@ -236,5 +241,5 @@ export default function Activities({
 }
 
 Activities.layout = {
-    breadcrumbs: [{ title: 'Aktivitas', href: activities.index() }],
+    breadcrumbs: [{ title: 'Activities', href: activities.index() }],
 };

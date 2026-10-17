@@ -60,13 +60,13 @@ abstract class SystemOperation extends Command
             $this->step('preflight', fn () => $this->preflight());
 
             if (! $lock->acquire()) {
-                throw new OperationFailed('lock_in_use', 'Instalasi atau upgrade lain sedang berjalan.', self::EXIT_LOCKED);
+                throw new OperationFailed('lock_in_use', 'Another install or upgrade is already running.', self::EXIT_LOCKED);
             }
 
             $this->perform();
             $this->finish('SUCCEEDED');
             $this->newLine();
-            $this->components->info(ucfirst($this->operation())." selesai: versi {$this->report['target_version']}.");
+            $this->components->info(ucfirst($this->operation())." finished: version {$this->report['target_version']}.");
 
             return self::SUCCESS;
         } catch (OperationFailed $e) {
@@ -78,7 +78,7 @@ abstract class SystemOperation extends Command
         } catch (Throwable $e) {
             $this->report['error'] = ['code' => 'unexpected', 'message' => $e->getMessage()];
             $this->finish('FAILED', 'unexpected');
-            $this->components->error('Operasi gagal: '.$e->getMessage());
+            $this->components->error('Operation failed: '.$e->getMessage());
 
             return self::EXIT_FAILED;
         } finally {
@@ -89,7 +89,7 @@ abstract class SystemOperation extends Command
     protected function step(string $name, callable $callback): mixed
     {
         if (config('kitchen.install.fail_at_step') === $name) {
-            throw new OperationFailed('simulated_failure', "Kegagalan simulasi pada langkah {$name}.");
+            throw new OperationFailed('simulated_failure', "Simulated failure at step {$name}.");
         }
 
         $started = microtime(true);
@@ -143,7 +143,7 @@ abstract class SystemOperation extends Command
         $failed = array_keys(array_filter($checks, fn ($ok) => ! $ok));
 
         if ($failed) {
-            throw new OperationFailed('preflight_failed', 'Preflight gagal: '.implode(', ', $failed), self::EXIT_PREFLIGHT);
+            throw new OperationFailed('preflight_failed', 'Preflight failed: '.implode(', ', $failed), self::EXIT_PREFLIGHT);
         }
     }
 
@@ -156,7 +156,7 @@ abstract class SystemOperation extends Command
         $pending = app(SystemStatus::class)->pendingMigrations();
 
         if ($exit !== 0 || $pending !== []) {
-            throw new OperationFailed('migration_incomplete', 'Migration belum lengkap: '.implode(', ', $pending ?: ['exit '.$exit]));
+            throw new OperationFailed('migration_incomplete', 'Migration incomplete: '.implode(', ', $pending ?: ['exit '.$exit]));
         }
     }
 
@@ -205,7 +205,7 @@ abstract class SystemOperation extends Command
             // The private report file remains the record when the database is unavailable.
         }
 
-        $this->line("Laporan: storage/app/private/{$key}");
+        $this->line("Report: storage/app/private/{$key}");
     }
 
     private function ensureAppKey(): bool

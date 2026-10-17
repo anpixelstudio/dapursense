@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { Copy, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import { ConfirmDialog } from '@/components/kitchen/confirm-dialog';
 import { Field, NativeSelect } from '@/components/kitchen/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,7 @@ export function ZoneEditor({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
     const [imageFailed, setImageFailed] = useState(false);
+    const [pendingDelete, setPendingDelete] = useState<Zone | null>(null);
 
     const toPoint = (e: { clientX: number; clientY: number }): Point => {
         const rect = svgRef.current!.getBoundingClientRect();
@@ -132,15 +134,7 @@ export function ZoneEditor({
     };
 
     const remove = (zone: Zone) => {
-        if (
-            confirm(
-                `Nonaktifkan zona "${zone.name}"? Hasil analisis lama tetap memakai snapshot zona.`,
-            )
-        ) {
-            router.delete(zonesRoutes.destroy(zone.id).url, {
-                preserveScroll: true,
-            });
-        }
+        setPendingDelete(zone);
     };
 
     const duplicate = (zone: Zone, target: string) => {
@@ -154,16 +148,33 @@ export function ZoneEditor({
     const visibleZones = zones.filter((z) => z.id !== draft?.id);
 
     return (
+        <>
+            <ConfirmDialog
+                open={pendingDelete !== null}
+                onOpenChange={(open) => !open && setPendingDelete(null)}
+                title={`Deactivate zone "${pendingDelete?.name ?? ''}"?`}
+                description="Past analysis results still use the zone snapshot from when they ran."
+                confirmLabel="Deactivate zone"
+                onConfirm={() => {
+                    if (!pendingDelete) {
+                        return;
+                    }
+                    router.delete(zonesRoutes.destroy(pendingDelete.id).url, {
+                        preserveScroll: true,
+                    });
+                    setPendingDelete(null);
+                }}
+            />
         <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="relative overflow-hidden rounded-xl border bg-black">
                 {imageFailed ? (
                     <div className="flex aspect-video items-center justify-center text-sm text-white/70">
-                        Frame referensi belum tersedia.
+                        Reference frame not available yet.
                     </div>
                 ) : (
                     <img
                         src={imageUrl}
-                        alt="Frame referensi kamera"
+                        alt="Camera reference frame"
                         className="block w-full select-none"
                         draggable={false}
                         onError={() => setImageFailed(true)}
@@ -228,7 +239,7 @@ export function ZoneEditor({
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             <title>
-                                                Seret untuk menambah titik
+                                                Drag to add a point
                                             </title>
                                         </circle>
                                     );
@@ -253,8 +264,8 @@ export function ZoneEditor({
                                     }}
                                 >
                                     <title>
-                                        Seret untuk memindah, klik dua kali
-                                        untuk menghapus
+                                        Drag to move, double-click
+                                        to remove
                                     </title>
                                 </circle>
                             ))}
@@ -280,7 +291,7 @@ export function ZoneEditor({
                     <div className="space-y-3 rounded-xl border p-4">
                         <div className="flex items-center justify-between">
                             <p className="font-medium">
-                                {draft.id ? 'Edit zona' : 'Zona baru'}
+                                {draft.id ? 'Edit zone' : 'New zone'}
                             </p>
                             <Button
                                 variant="ghost"
@@ -295,11 +306,11 @@ export function ZoneEditor({
                         </div>
                         <p className="text-xs text-muted-foreground">
                             {draft.id
-                                ? 'Seret titik putih untuk memindah, seret titik kecil di tengah sisi untuk menambah titik, klik dua kali titik putih untuk menghapus. Perubahan bentuk atau jenis menaikkan revisi zona.'
-                                : 'Klik pada gambar untuk menambah titik (minimal 3), lalu rapikan dengan menyeret titik atau titik tengah sisi. Ikuti tepi meja; posisi kaki orang menentukan zona.'}
+                                ? 'Drag white points to move, drag small mid-edge points to add points, double-click white points to remove. Shape or type changes bump the zone revision.'
+                                : 'Click the image to add points (minimum 3), then refine by dragging points or mid-edge points. Follow table edges; foot position determines the zone.'}
                         </p>
                         <Field
-                            label="Nama zona"
+                            label="Zone name"
                             htmlFor="zone-name"
                             error={errors.name}
                         >
@@ -312,7 +323,7 @@ export function ZoneEditor({
                             />
                         </Field>
                         <Field
-                            label="Jenis"
+                            label="Type"
                             htmlFor="zone-type"
                             error={errors.type}
                         >
@@ -334,7 +345,7 @@ export function ZoneEditor({
                             </NativeSelect>
                         </Field>
                         <p className="text-xs text-muted-foreground">
-                            Titik: {draft.points.length}
+                            Points: {draft.points.length}
                         </p>
                         {(errors.points ||
                             Object.keys(errors).some((k) =>
@@ -342,7 +353,7 @@ export function ZoneEditor({
                             )) && (
                             <p className="text-sm text-destructive">
                                 {errors.points ??
-                                    'Koordinat polygon tidak valid.'}
+                                    'Invalid polygon coordinates.'}
                             </p>
                         )}
                         <div className="flex gap-2">
@@ -356,7 +367,7 @@ export function ZoneEditor({
                                         })
                                     }
                                 >
-                                    Hapus titik terakhir
+                                    Remove last point
                                 </Button>
                             )}
                             <Button
@@ -368,7 +379,7 @@ export function ZoneEditor({
                                 }
                                 data-test="save-zone"
                             >
-                                Simpan zona
+                                Save zone
                             </Button>
                         </div>
                     </div>
@@ -386,17 +397,17 @@ export function ZoneEditor({
                             }
                             data-test="new-zone"
                         >
-                            <Plus /> Gambar zona baru
+                            <Plus /> Draw new zone
                         </Button>
                     )
                 )}
 
                 <div className="space-y-2">
-                    <p className="text-sm font-medium">Zona aktif sumber ini</p>
+                    <p className="text-sm font-medium">Active zones for this source</p>
                     {zones.length === 0 && (
                         <p className="text-sm text-muted-foreground">
-                            Belum ada zona. Tanpa zona, analisis hanya mencatat
-                            orang di luar zona dan tidak menilai APD.
+                            No zones yet. Without zones, analysis only records
+                            people outside zones and does not assess PPE.
                         </p>
                     )}
                     {zones.map((zone) => (
@@ -411,7 +422,7 @@ export function ZoneEditor({
                             <div className="flex-1">
                                 <p className="font-medium">{zone.name}</p>
                                 <p className="text-xs text-muted-foreground">
-                                    {zoneLabel(zone.type)} · revisi{' '}
+                                    {zoneLabel(zone.type)} · rev{' '}
                                     {zone.revision}
                                 </p>
                             </div>
@@ -435,7 +446,7 @@ export function ZoneEditor({
                                     {otherSources.length > 0 && (
                                         <NativeSelect
                                             className="h-8 w-9 px-1"
-                                            title="Salin ke sumber lain"
+                                            title="Copy to another source"
                                             value=""
                                             onChange={(e) =>
                                                 e.target.value &&
@@ -445,7 +456,7 @@ export function ZoneEditor({
                                             <option value="">⧉</option>
                                             {otherSources.map((s) => (
                                                 <option key={s.id} value={s.id}>
-                                                    Salin ke {s.name}
+                                                    Copy to {s.name}
                                                 </option>
                                             ))}
                                         </NativeSelect>
@@ -453,7 +464,7 @@ export function ZoneEditor({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        title="Nonaktifkan"
+                                        title="Deactivate"
                                         onClick={() => remove(zone)}
                                     >
                                         <Trash2 />
@@ -465,11 +476,12 @@ export function ZoneEditor({
                 </div>
                 {otherSources.length > 0 && canEdit && (
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Copy className="size-3" /> Zona dapat disalin ke sumber
-                        lain lalu disesuaikan dengan sudut kamera.
+                        <Copy className="size-3" /> Zones can be copied to another
+                        source and adjusted for the camera angle.
                     </p>
                 )}
             </div>
         </div>
+        </>
     );
 }

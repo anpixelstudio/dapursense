@@ -19,7 +19,7 @@ class DeviceHeartbeatController extends Controller
             ->where('heartbeat_token_hash', hash('sha256', $token))
             ->first();
 
-        abort_if($device === null, 401, 'Token perangkat tidak valid.');
+        abort_if($device === null, 401, 'Invalid device token.');
 
         $meta = $request->validate([
             'version' => ['nullable', 'string', 'max:32'],

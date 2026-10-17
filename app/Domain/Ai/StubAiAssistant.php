@@ -14,25 +14,9 @@ class StubAiAssistant implements AiAssistant
 
     public function summarizeEvent(array $event, string $locale = 'en'): string
     {
-        $locale = AiPrompts::normalizeLocale($locale);
         $type = (string) ($event['type_label'] ?? $event['type'] ?? 'event');
         $source = (string) ($event['source'] ?? $event['device_name'] ?? 'camera');
         $when = (string) ($event['occurred_at'] ?? $event['created_at'] ?? 'unknown time');
-
-        if ($locale === 'id') {
-            return trim(<<<TXT
-[Mode demo — Gemini belum terhubung]
-
-**Ringkasan:** {$type} terdeteksi di {$source} pada {$when}.
-
-**Tindak lanjut:**
-- [ ] Tinjau bukti di panel review
-- [ ] Konfirmasi atau abaikan kejadian
-- [ ] Catat tindakan korektif bila perlu
-
-Setel `AI_PROVIDER=gemini` dan `GEMINI_API_KEY` untuk ringkasan live.
-TXT);
-        }
 
         return trim(<<<TXT
 [Demo mode — Gemini not connected]
@@ -50,7 +34,6 @@ TXT);
 
     public function chatSop(string $message, array $history = [], ?string $sopContext = null, string $locale = 'en'): string
     {
-        $locale = AiPrompts::normalizeLocale($locale);
         $message = AiSafety::sanitizeUserText($message);
 
         if (AiSafety::looksLikeJailbreak($message)) {
@@ -58,37 +41,11 @@ TXT);
         }
 
         if ($this->asksAboutWorkforce($message)) {
-            return $this->stubWorkforceReply($sopContext, $locale, $message);
+            return $this->stubWorkforceReply($sopContext, $message);
         }
 
         if ($this->asksAboutReports($message)) {
-            return $this->stubPeriodReportsReply($sopContext, $locale, $message);
-        }
-
-        if ($locale === 'id') {
-            $hint = $sopContext
-                ? 'Konteks helper diterima (mode demo belum menafsirkan penuh).'
-                : 'Belum ada snapshot konteks yang dilampirkan.';
-
-            return trim(<<<TXT
-[Mode demo — Gemini belum terhubung]
-
-Pertanyaan Anda: **"{$message}"**
-
-{$hint}
-
-**Contoh jawaban helper:**
-1. Di zona kerja dapur, penutup rambut dan celemek biasanya wajib.
-2. Sarung tangan tergantung tugas (persiapan makanan vs mencuci).
-3. Area terlarang tidak boleh dimasuki tanpa otorisasi.
-
-**Checklist cepat:**
-- [ ] Cek aturan zona di Aturan SOP
-- [ ] Pastikan kamera area kritis online
-- [ ] Tinjau anomali terbuka di antrean
-
-Setel `GEMINI_API_KEY` + `AI_PROVIDER=gemini` untuk jawaban berbasis aturan Anda.
-TXT);
+            return $this->stubPeriodReportsReply($sopContext, $message);
         }
 
         $hint = $sopContext
@@ -153,7 +110,7 @@ TXT);
         return 'today';
     }
 
-    private function stubPeriodReportsReply(?string $contextJson, string $locale, string $message): string
+    private function stubPeriodReportsReply(?string $contextJson, string $message): string
     {
         $period = $this->detectPeriod($message);
         $context = json_decode((string) $contextJson, true);
@@ -174,9 +131,9 @@ TXT);
         $team = (int) ($context['team']['active_member_count'] ?? 0);
 
         $periodLabel = match ($period) {
-            'yesterday' => $locale === 'id' ? 'kemarin' : 'yesterday',
-            'this_month' => $locale === 'id' ? 'bulan ini' : 'this month',
-            default => $locale === 'id' ? 'hari ini' : 'today',
+            'yesterday' => 'yesterday',
+            'this_month' => 'this month',
+            default => 'today',
         };
 
         $lines = [];
@@ -191,34 +148,8 @@ TXT);
             $lines[] = "- [ ] **{$format}** · {$status} · {$when} · {$who}";
         }
 
-        $empty = $locale === 'id'
-            ? "- (Belum ada laporan CSV/PDF untuk {$periodLabel})"
-            : "- (No CSV/PDF reports for {$periodLabel} yet)";
+        $empty = "- (No CSV/PDF reports for {$periodLabel} yet)";
         $list = $lines === [] ? $empty : implode("\n", $lines);
-
-        if ($locale === 'id') {
-            return trim(<<<TXT
-[Mode demo — laporan fleksibel]
-
-**Periode:** {$periodLabel}
-**Laporan ekspor:** {$count} item
-
-{$list}
-
-**Snapshot operasional ({$periodLabel}):**
-- Anomali dibuat: {$events}
-- Orang terdeteksi (track CCTV): {$people}
-- Tim DapurSense aktif: {$team}
-- Masih OPEN / ACKNOWLEDGED: {$open}
-
-**Bisa dilakukan sekarang:**
-- [ ] Buka **Laporan** (`/reports`) untuk unduh CSV/PDF
-- [ ] Tab **Laporan** di Asisten untuk narasi AI
-- [ ] Tanya juga: kemarin / bulan ini / jumlah karyawan
-
-Aktifkan Gemini untuk jawaban lebih naratif.
-TXT);
-        }
 
         return trim(<<<TXT
 [Demo mode — flexible reports]
@@ -243,7 +174,7 @@ Enable Gemini for a richer narrative.
 TXT);
     }
 
-    private function stubWorkforceReply(?string $contextJson, string $locale, string $message): string
+    private function stubWorkforceReply(?string $contextJson, string $message): string
     {
         $period = $this->detectPeriod($message);
         $context = json_decode((string) $contextJson, true);
@@ -257,9 +188,9 @@ TXT);
         $runs = (int) ($people['succeeded_runs'] ?? 0);
 
         $periodLabel = match ($period) {
-            'yesterday' => $locale === 'id' ? 'kemarin' : 'yesterday',
-            'this_month' => $locale === 'id' ? 'bulan ini' : 'this month',
-            default => $locale === 'id' ? 'hari ini' : 'today',
+            'yesterday' => 'yesterday',
+            'this_month' => 'this month',
+            default => 'today',
         };
 
         $memberLines = [];
@@ -272,27 +203,8 @@ TXT);
             $memberLines[] = "- **{$name}** · {$role}";
         }
         $memberList = $memberLines === []
-            ? ($locale === 'id' ? '- (Belum ada anggota aktif)' : '- (No active members)')
+            ? '- (No active members)'
             : implode("\n", $memberLines);
-
-        if ($locale === 'id') {
-            return trim(<<<TXT
-[Mode demo — tim & kehadiran]
-
-**Tim DapurSense (akun organisasi):** {$memberCount} anggota aktif
-
-{$memberList}
-
-**Orang terdeteksi CCTV ({$periodLabel}):**
-- Person track: {$tracks}
-- Analisis sukses: {$runs}
-
-**Catatan:** Jumlah anggota = user yang terdaftar di DapurSense, **bukan** payroll HR. Person track = deteksi orang di video teranalisis.
-
-- [ ] Kelola anggota di `/members`
-- [ ] Tanya laporan **hari ini / kemarin / bulan ini**
-TXT);
-        }
 
         return trim(<<<TXT
 [Demo mode — team & presence]
@@ -314,37 +226,11 @@ TXT);
 
     public function dailyReport(array $stats, string $focus = 'operations', string $locale = 'en'): string
     {
-        $locale = AiPrompts::normalizeLocale($locale);
         $open = (int) ($stats['open_events'] ?? 0);
         $people = (int) ($stats['people'] ?? 0);
         $restricted = (int) ($stats['restricted'] ?? 0);
         $videos = (int) ($stats['analysed_videos'] ?? 0);
         $focus = in_array($focus, ['operations', 'safety', 'throughput'], true) ? $focus : 'operations';
-
-        if ($locale === 'id') {
-            return trim(<<<TXT
-[Mode demo — template laporan terkunci]
-
-**Periode:** 7 hari terakhir · Fokus: **{$focus}**
-
-**Sorotan KPI:**
-- Video teranalisis: {$videos}
-- Orang terdeteksi: {$people}
-- Anomali terbuka: {$open}
-- Kejadian zona terlarang: {$restricted}
-
-**Risiko / item terbuka:**
-- Selesaikan review terbuka sebelum jam sibuk berikutnya
-- Pastikan kamera kritis tetap online
-
-**Rekomendasi:**
-- [ ] Bersihkan kejadian OPEN / ACKNOWLEDGED di antrean anomali
-- [ ] Jalankan ulang analisis setelah edit zona
-- [ ] Aktifkan Gemini untuk laporan naratif dari statistik live
-
-Surface laporan ini tidak menerima instruksi bebas.
-TXT);
-        }
 
         return trim(<<<TXT
 [Demo mode — locked report template]

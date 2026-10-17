@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
  * can resume. Active runs and evidence holds always block cleanup.
  */
 #[Signature('retention:cleanup')]
-#[Description('Hapus file yang melewati masa retensi sesuai kebijakan (video asli, observasi, bukti, laporan)')]
+#[Description('Delete files past retention policy (original video, observations, evidence, reports)')]
 class RetentionCleanup extends Command
 {
     public function handle(): int
@@ -78,7 +78,7 @@ class RetentionCleanup extends Command
             ->where('hour', '<', now()->subDays(config('kitchen.uptime.stats_retention_days')))
             ->delete();
 
-        $this->table(['Jenis', 'Dihapus'], collect($counts)->map(fn ($v, $k) => [$k, $v])->values());
+        $this->table(['Kind', 'Deleted'], collect($counts)->map(fn ($v, $k) => [$k, $v])->values());
 
         return self::SUCCESS;
     }

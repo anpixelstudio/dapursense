@@ -46,7 +46,7 @@ export function Timeline({
     if (tracks.length === 0) {
         return (
             <p className="text-sm text-muted-foreground">
-                Belum ada orang terdeteksi.
+                No people detected yet.
             </p>
         );
     }
@@ -59,21 +59,21 @@ export function Timeline({
                         className="size-2 rounded-sm"
                         style={{ background: PPE_COLORS.present }}
                     />{' '}
-                    APD ada
+                    PPE present
                 </span>
                 <span className="flex items-center gap-1">
                     <span
                         className="size-2 rounded-sm"
                         style={{ background: PPE_COLORS.missing }}
                     />{' '}
-                    APD tidak terdeteksi
+                    PPE not detected
                 </span>
                 <span className="flex items-center gap-1">
                     <span
                         className="size-2 rounded-sm"
                         style={{ background: PPE_COLORS.unknown }}
                     />{' '}
-                    Tidak dapat dinilai
+                    Cannot assess
                 </span>
             </div>
             {tracks.map((track) => {
@@ -89,7 +89,7 @@ export function Timeline({
                         className="grid grid-cols-[90px_1fr] items-start gap-2"
                     >
                         <div className="pt-1 text-xs font-medium">
-                            Orang {track.track_key}
+                            Person {track.track_key}
                         </div>
                         <div className="relative space-y-1">
                             <div className="relative h-5 rounded bg-muted">

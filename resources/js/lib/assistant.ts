@@ -29,7 +29,7 @@ export async function postAssistant<T>(
 
     if (!response.ok) {
         throw new Error(
-            data.message ?? `Gagal memanggil asisten (${response.status})`,
+            data.message ?? `Assistant request failed (${response.status})`,
         );
     }
 

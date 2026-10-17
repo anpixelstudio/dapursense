@@ -41,11 +41,11 @@ enum ReviewStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Open => 'Terbuka',
-            self::Acknowledged => 'Diperiksa',
-            self::Confirmed => 'Dikonfirmasi',
-            self::Dismissed => 'Ditolak',
-            self::Resolved => 'Selesai',
+            self::Open => 'Open',
+            self::Acknowledged => 'Acknowledged',
+            self::Confirmed => 'Confirmed',
+            self::Dismissed => 'Dismissed',
+            self::Resolved => 'Resolved',
         };
     }
 }

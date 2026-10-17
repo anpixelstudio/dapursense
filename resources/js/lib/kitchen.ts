@@ -7,11 +7,11 @@ import type {
 } from '@/types/kitchen';
 
 export const ZONE_TYPES: { value: ZoneType; label: string; color: string }[] = [
-    { value: 'prep', label: 'Persiapan', color: '#2563eb' },
-    { value: 'stove', label: 'Kompor', color: '#ea580c' },
-    { value: 'sink', label: 'Cuci', color: '#0891b2' },
-    { value: 'cleaning', label: 'Kebersihan', color: '#16a34a' },
-    { value: 'restricted', label: 'Area terlarang', color: '#dc2626' },
+    { value: 'prep', label: 'Prep', color: '#2563eb' },
+    { value: 'stove', label: 'Stove', color: '#ea580c' },
+    { value: 'sink', label: 'Sink', color: '#0891b2' },
+    { value: 'cleaning', label: 'Cleaning', color: '#16a34a' },
+    { value: 'restricted', label: 'Restricted', color: '#dc2626' },
 ];
 
 export const zoneColor = (type: string): string =>
@@ -21,44 +21,44 @@ export const zoneLabel = (type: string): string =>
     ZONE_TYPES.find((z) => z.value === type)?.label ?? type;
 
 const ACTIVITY_LABELS: Record<string, string> = {
-    in_prep_zone: 'Di zona persiapan',
-    in_stove_zone: 'Di zona kompor',
-    in_sink_zone: 'Di zona cuci',
-    in_cleaning_zone: 'Di zona kebersihan',
-    in_restricted_zone: 'Di area terlarang',
-    outside_zones: 'Di luar zona',
-    cooking: 'Memasak',
-    preparing: 'Menyiapkan',
-    washing: 'Mencuci',
-    cleaning: 'Membersihkan',
-    serving: 'Menyajikan',
-    stationary: 'Diam',
-    unknown: 'Tidak diketahui',
+    in_prep_zone: 'In prep zone',
+    in_stove_zone: 'In stove zone',
+    in_sink_zone: 'In sink zone',
+    in_cleaning_zone: 'In cleaning zone',
+    in_restricted_zone: 'In restricted area',
+    outside_zones: 'Outside zones',
+    cooking: 'Cooking',
+    preparing: 'Preparing',
+    washing: 'Washing',
+    cleaning: 'Cleaning',
+    serving: 'Serving',
+    stationary: 'Stationary',
+    unknown: 'Unknown',
 };
 
 export const activityLabel = (label: string): string =>
     ACTIVITY_LABELS[label] ?? label;
 
 const EVENT_TYPES: Record<string, string> = {
-    ppe_missing: 'APD tidak terdeteksi',
-    restricted_zone: 'Masuk area terlarang',
-    unassessable_ppe: 'APD tidak dapat dinilai',
-    source_unreadable: 'Video tidak terbaca',
-    observation_lost: 'Pengamatan terputus',
-    analysis_stalled: 'Analisis macet',
-    device_offline: 'Perangkat offline',
+    ppe_missing: 'PPE not detected',
+    restricted_zone: 'Entered restricted area',
+    unassessable_ppe: 'PPE cannot be assessed',
+    source_unreadable: 'Video unreadable',
+    observation_lost: 'Observation lost',
+    analysis_stalled: 'Analysis stalled',
+    device_offline: 'Device offline',
 };
 
 export const eventTypeLabel = (type: string): string =>
     EVENT_TYPES[type] ?? type;
 
 const DEVICE_ERRORS: Record<string, string> = {
-    refused: 'Koneksi ditolak',
-    timeout: 'Tidak merespons',
-    dns: 'Host tidak ditemukan',
-    no_heartbeat: 'Heartbeat berhenti',
-    unavailable: 'Layanan tidak tersedia',
-    storage_full: 'Penyimpanan penuh',
+    refused: 'Connection refused',
+    timeout: 'No response',
+    dns: 'Host not found',
+    no_heartbeat: 'Heartbeat stopped',
+    unavailable: 'Service unavailable',
+    storage_full: 'Storage full',
 };
 
 export const deviceErrorLabel = (code: string | null | undefined): string =>
@@ -71,28 +71,28 @@ export const eventPlace = (event: {
     event.source?.name ?? (event.evidence?.device_name as string) ?? '-';
 
 const PPE_ITEMS: Record<string, string> = {
-    hair_cover: 'Penutup rambut',
-    apron: 'Celemek',
-    glove: 'Sarung tangan',
-    mask: 'Masker',
+    hair_cover: 'Hair cover',
+    apron: 'Apron',
+    glove: 'Gloves',
+    mask: 'Mask',
 };
 
 export const ppeLabel = (item: string): string => PPE_ITEMS[item] ?? item;
 
 const PPE_REASONS: Record<string, string> = {
-    unsupported: 'model belum mendeteksi APD',
-    low_confidence: 'keyakinan rendah',
-    occluded: 'tertutup',
-    not_reported: 'tidak dilaporkan model',
+    unsupported: 'model does not detect this PPE',
+    low_confidence: 'low confidence',
+    occluded: 'occluded',
+    not_reported: 'not reported by model',
 };
 
 export const ppeReasonLabel = (reason: string): string =>
     PPE_REASONS[reason] ?? reason;
 
 const LIFECYCLE_LABELS: Record<string, string> = {
-    active: 'Masih berlangsung',
-    closed: 'Selesai',
-    observation_lost: 'Orang hilang dari pengamatan',
+    active: 'In progress',
+    closed: 'Closed',
+    observation_lost: 'Person lost from observation',
 };
 
 export const lifecycleLabel = (lifecycle: string): string =>
@@ -102,101 +102,101 @@ export const ruleRevisionLabel = (
     revision?: { version: number; rule_set?: { name: string } | null } | null,
 ): string =>
     revision
-        ? `${revision.rule_set?.name ?? 'Aturan'} (revisi ${revision.version})`
+        ? `${revision.rule_set?.name ?? 'Rules'} (rev ${revision.version})`
         : '-';
 
 export const CATEGORY_LABELS: Record<string, string> = {
-    violation: 'Pelanggaran',
-    system: 'Sistem',
-    review_needed: 'Perlu ditinjau',
+    violation: 'Violation',
+    system: 'System',
+    review_needed: 'Needs review',
 };
 
 export const REVIEW_LABELS: Record<ReviewStatus, string> = {
-    OPEN: 'Terbuka',
-    ACKNOWLEDGED: 'Diperiksa',
-    CONFIRMED: 'Dikonfirmasi',
-    DISMISSED: 'Ditolak',
-    RESOLVED: 'Selesai',
+    OPEN: 'Open',
+    ACKNOWLEDGED: 'Acknowledged',
+    CONFIRMED: 'Confirmed',
+    DISMISSED: 'Dismissed',
+    RESOLVED: 'Resolved',
 };
 
 export const DISMISS_LABELS: Record<string, string> = {
-    false_detection: 'Deteksi keliru',
-    not_applicable: 'Tidak berlaku',
-    duplicate: 'Duplikat',
-    other: 'Lainnya',
+    false_detection: 'False detection',
+    not_applicable: 'Not applicable',
+    duplicate: 'Duplicate',
+    other: 'Other',
 };
 
 export const RUN_LABELS: Record<RunStatus, string> = {
-    QUEUED: 'Antre',
-    RUNNING: 'Berjalan',
-    SUCCEEDED: 'Selesai',
-    FAILED: 'Gagal',
-    CANCELLED: 'Dibatalkan',
+    QUEUED: 'Queued',
+    RUNNING: 'Running',
+    SUCCEEDED: 'Succeeded',
+    FAILED: 'Failed',
+    CANCELLED: 'Cancelled',
 };
 
 export const VIDEO_LABELS: Record<VideoStatus, string> = {
-    VALIDATING: 'Sedang divalidasi',
-    READY: 'Siap',
-    REJECTED: 'Ditolak',
+    VALIDATING: 'Validating',
+    READY: 'Ready',
+    REJECTED: 'Rejected',
 };
 
 const AUDIT_ACTIONS: Record<string, string> = {
-    'tenant.registered': 'Organisasi didaftarkan',
-    'property.created': 'Outlet dibuat',
-    'property.updated': 'Outlet diubah',
-    'property.deleted': 'Outlet dihapus',
-    'kitchen.created': 'Dapur dibuat',
-    'kitchen.updated': 'Dapur diubah',
-    'kitchen.deleted': 'Dapur dihapus',
-    'source.created': 'Kamera ditambahkan',
-    'source.updated': 'Kamera diubah',
-    'source.deleted': 'Kamera dihapus',
-    'zone.created': 'Zona dibuat',
-    'zone.updated': 'Zona diubah',
-    'zone.deactivated': 'Zona dinonaktifkan',
-    'zone.duplicated': 'Zona disalin',
-    'video.uploaded': 'Video diunggah',
-    'video.updated': 'Video diubah',
-    'video.deleted': 'Video dihapus',
-    'analysis.requested': 'Analisis dijalankan',
-    'analysis.cancel_requested': 'Analisis dibatalkan',
-    'event.reviewed': 'Anomali ditinjau',
-    'event.hold_set': 'Bukti ditahan',
-    'event.hold_released': 'Penahanan bukti dilepas',
-    'rules.created': 'Rule set dibuat',
-    'rules.published': 'Aturan diterbitkan',
-    'report.requested': 'Laporan diminta',
-    'report.downloaded': 'Laporan diunduh',
-    'report.schedule_created': 'Jadwal laporan dibuat',
-    'report.schedule_deleted': 'Jadwal laporan dihapus',
-    'member.invited': 'Anggota diundang',
-    'member.invitation_revoked': 'Undangan dibatalkan',
-    'member.joined': 'Anggota bergabung',
-    'member.updated': 'Anggota diubah',
-    'device.created': 'Perangkat ditambahkan',
-    'device.updated': 'Perangkat diubah',
-    'device.deleted': 'Perangkat dihapus',
-    'device.token_rotated': 'Token perangkat diganti',
+    'tenant.registered': 'Organization registered',
+    'property.created': 'Property created',
+    'property.updated': 'Property updated',
+    'property.deleted': 'Property deleted',
+    'kitchen.created': 'Kitchen created',
+    'kitchen.updated': 'Kitchen updated',
+    'kitchen.deleted': 'Kitchen deleted',
+    'source.created': 'Camera added',
+    'source.updated': 'Camera updated',
+    'source.deleted': 'Camera removed',
+    'zone.created': 'Zone created',
+    'zone.updated': 'Zone updated',
+    'zone.deactivated': 'Zone deactivated',
+    'zone.duplicated': 'Zone duplicated',
+    'video.uploaded': 'Video uploaded',
+    'video.updated': 'Video updated',
+    'video.deleted': 'Video deleted',
+    'analysis.requested': 'Analysis started',
+    'analysis.cancel_requested': 'Analysis cancelled',
+    'event.reviewed': 'Anomaly reviewed',
+    'event.hold_set': 'Evidence hold set',
+    'event.hold_released': 'Evidence hold released',
+    'rules.created': 'Rule set created',
+    'rules.published': 'Rules published',
+    'report.requested': 'Report requested',
+    'report.downloaded': 'Report downloaded',
+    'report.schedule_created': 'Report schedule created',
+    'report.schedule_deleted': 'Report schedule deleted',
+    'member.invited': 'Member invited',
+    'member.invitation_revoked': 'Invitation revoked',
+    'member.joined': 'Member joined',
+    'member.updated': 'Member updated',
+    'device.created': 'Device added',
+    'device.updated': 'Device updated',
+    'device.deleted': 'Device removed',
+    'device.token_rotated': 'Device token rotated',
 };
 
 export const auditActionLabel = (action: string): string =>
     AUDIT_ACTIONS[action] ?? action;
 
 const AUDIT_SUBJECTS: Record<string, string> = {
-    Tenant: 'Organisasi',
-    Property: 'Outlet',
-    Kitchen: 'Dapur',
-    MediaSource: 'Kamera',
-    Zone: 'Zona',
+    Tenant: 'Organization',
+    Property: 'Property',
+    Kitchen: 'Kitchen',
+    MediaSource: 'Camera',
+    Zone: 'Zone',
     VideoAsset: 'Video',
-    AnalysisRun: 'Analisis',
-    AnomalyEvent: 'Anomali',
+    AnalysisRun: 'Analysis',
+    AnomalyEvent: 'Anomaly',
     RuleSet: 'Rule set',
-    Report: 'Laporan',
-    ReportSchedule: 'Jadwal laporan',
-    Invitation: 'Undangan',
-    TenantMembership: 'Keanggotaan',
-    Device: 'Perangkat',
+    Report: 'Report',
+    ReportSchedule: 'Report schedule',
+    Invitation: 'Invitation',
+    TenantMembership: 'Membership',
+    Device: 'Device',
 };
 
 export const auditSubjectLabel = (type: string | null): string => {
@@ -234,7 +234,7 @@ export function formatDateTime(
         return '-';
     }
 
-    return new Intl.DateTimeFormat('id-ID', {
+    return new Intl.DateTimeFormat('en-US', {
         dateStyle: 'medium',
         timeStyle: 'short',
         timeZone: timezone,

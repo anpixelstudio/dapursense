@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     EmptyState,
     Field,
@@ -21,6 +21,7 @@ import {
     formatMs,
     useTenant,
 } from '@/lib/kitchen';
+import { cn } from '@/lib/utils';
 import sources from '@/routes/sources';
 import videos from '@/routes/videos';
 import type { Paginated, Video } from '@/types/kitchen';
@@ -48,6 +49,7 @@ export default function Videos({
 }: Props) {
     const { can, tenant } = useTenant();
     const [search, setSearch] = useState(filters.search ?? '');
+    const fileRef = useRef<HTMLInputElement>(null);
     const form = useForm<{
         source_id: string;
         video: File | null;
@@ -72,30 +74,30 @@ export default function Videos({
 
     return (
         <>
-            <Head title="Video & Analisis" />
+            <Head title="Video & Analysis" />
             <Page>
                 <PageHeader
-                    title="Video & Analisis"
-                    description={`Upload rekaman CCTV (${limits.extensions.join(', ').toUpperCase()}, maks ${formatBytes(limits.max_bytes)}, ${limits.max_duration_minutes} menit). Video divalidasi dan dibuatkan preview sebelum dapat dianalisis.`}
+                    title="Video & Analysis"
+                    description={`Upload CCTV footage (${limits.extensions.join(', ').toUpperCase()}, max ${formatBytes(limits.max_bytes)}, ${limits.max_duration_minutes} min). Videos are validated and given a preview before analysis.`}
                 />
                 <PageErrors keys={['video']} />
 
                 {can('upload_video') &&
                     (sourceList.length === 0 ? (
                         <EmptyState
-                            title="Belum ada sumber video aktif"
-                            description="Tambahkan sumber video (sudut kamera) sebelum upload."
+                            title="No active video sources yet"
+                            description="Add a video source (camera angle) before uploading."
                             action={
                                 <Button asChild variant="outline">
                                     <Link href={sources.index()}>
-                                        Ke Sumber Video
+                                        Go to Video Sources
                                     </Link>
                                 </Button>
                             }
                         />
                     ) : (
                         <form
-                            className="grid gap-3 rounded-xl border p-4 md:grid-cols-2 lg:grid-cols-[1fr_1.4fr_1fr_auto] lg:items-end"
+                            className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 form.post(videos.store().url, {
@@ -103,86 +105,137 @@ export default function Videos({
                                 });
                             }}
                         >
-                            <Field
-                                label="Sumber / kamera"
-                                htmlFor="upload-source"
-                                error={form.errors.source_id}
-                            >
-                                <NativeSelect
-                                    id="upload-source"
-                                    value={form.data.source_id}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'source_id',
-                                            e.target.value,
-                                        )
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <Field
+                                    label="Source / camera"
+                                    htmlFor="upload-source"
+                                    error={form.errors.source_id}
+                                >
+                                    <NativeSelect
+                                        id="upload-source"
+                                        value={form.data.source_id}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'source_id',
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        {sourceList.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.name} ({s.kitchen?.name})
+                                            </option>
+                                        ))}
+                                    </NativeSelect>
+                                </Field>
+
+                                <Field
+                                    label="Video file"
+                                    htmlFor="upload-file"
+                                    error={
+                                        form.errors.video ??
+                                        (tooLarge
+                                            ? `File exceeds limit ${formatBytes(limits.max_bytes)}.`
+                                            : undefined)
                                     }
                                 >
-                                    {sourceList.map((s) => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.name} ({s.kitchen?.name})
-                                        </option>
-                                    ))}
-                                </NativeSelect>
-                            </Field>
-                            <Field
-                                label="File video"
-                                htmlFor="upload-file"
-                                error={
-                                    form.errors.video ??
-                                    (tooLarge
-                                        ? `File melebihi batas ${formatBytes(limits.max_bytes)}.`
-                                        : undefined)
-                                }
-                            >
-                                <Input
-                                    id="upload-file"
-                                    type="file"
-                                    accept={limits.extensions
-                                        .map((e) => `.${e}`)
-                                        .join(',')}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'video',
-                                            e.target.files?.[0] ?? null,
-                                        )
-                                    }
-                                />
-                            </Field>
-                            <Field
-                                label="Waktu rekaman (opsional)"
-                                htmlFor="upload-recorded"
-                                error={form.errors.recorded_at}
-                                hint={`Zona waktu ${form.data.recorded_timezone}`}
-                            >
-                                <Input
-                                    id="upload-recorded"
-                                    type="datetime-local"
-                                    value={form.data.recorded_at}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'recorded_at',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </Field>
-                            <Button
-                                disabled={
-                                    form.processing ||
-                                    !form.data.video ||
-                                    tooLarge
-                                }
-                                data-test="upload-video"
-                            >
-                                {form.processing
-                                    ? `Mengunggah ${form.progress?.percentage ?? 0}%`
-                                    : 'Upload'}
-                            </Button>
-                            {form.progress && (
-                                <div className="h-1.5 rounded bg-muted md:col-span-2 lg:col-span-4">
                                     <div
-                                        className="h-full rounded bg-primary transition-all"
+                                        className={cn(
+                                            'border-input flex h-9 w-full min-w-0 items-center gap-2 rounded-md border bg-transparent px-1 shadow-xs',
+                                            'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+                                        )}
+                                    >
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="sm"
+                                            className="h-7 shrink-0 px-2.5"
+                                            onClick={() =>
+                                                fileRef.current?.click()
+                                            }
+                                        >
+                                            Choose file
+                                        </Button>
+                                        <span
+                                            className={cn(
+                                                'min-w-0 flex-1 truncate text-sm',
+                                                form.data.video
+                                                    ? 'text-foreground'
+                                                    : 'text-muted-foreground',
+                                            )}
+                                            title={
+                                                form.data.video?.name ??
+                                                undefined
+                                            }
+                                        >
+                                            {form.data.video
+                                                ? form.data.video.name
+                                                : 'No file chosen'}
+                                        </span>
+                                        <input
+                                            ref={fileRef}
+                                            id="upload-file"
+                                            type="file"
+                                            className="sr-only"
+                                            accept={limits.extensions
+                                                .map((e) => `.${e}`)
+                                                .join(',')}
+                                            onChange={(e) =>
+                                                form.setData(
+                                                    'video',
+                                                    e.target.files?.[0] ?? null,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </Field>
+
+                                <Field
+                                    label="Recording time"
+                                    htmlFor="upload-recorded"
+                                    error={form.errors.recorded_at}
+                                >
+                                    <Input
+                                        id="upload-recorded"
+                                        type="datetime-local"
+                                        className="h-9 [color-scheme:light] dark:[color-scheme:dark]"
+                                        value={form.data.recorded_at}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'recorded_at',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </Field>
+                            </div>
+
+                            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-xs text-muted-foreground">
+                                    Recording time is optional · timezone{' '}
+                                    <span className="font-medium text-foreground/80">
+                                        {form.data.recorded_timezone}
+                                    </span>
+                                </p>
+                                <Button
+                                    className="h-9 shrink-0 sm:min-w-28"
+                                    disabled={
+                                        form.processing ||
+                                        !form.data.video ||
+                                        tooLarge
+                                    }
+                                    data-test="upload-video"
+                                >
+                                    {form.processing
+                                        ? `Uploading ${form.progress?.percentage ?? 0}%`
+                                        : 'Upload'}
+                                </Button>
+                            </div>
+
+                            {form.progress && (
+                                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                    <div
+                                        className="h-full rounded-full bg-primary transition-all"
                                         style={{
                                             width: `${form.progress.percentage}%`,
                                         }}
@@ -192,35 +245,35 @@ export default function Videos({
                         </form>
                     ))}
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                     <form
-                        className="flex gap-2"
+                        className="flex min-w-0 flex-1 gap-2 sm:max-w-xs"
                         onSubmit={(e) => {
                             e.preventDefault();
                             applyFilter({ search: search || undefined });
                         }}
                     >
                         <Input
-                            placeholder="Cari nama file"
+                            placeholder="Search file name"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-56"
+                            className="h-9 min-w-0 flex-1"
                         />
                     </form>
                     <NativeSelect
-                        className="w-44"
+                        className="h-9 w-full sm:w-44"
                         value={filters.status ?? ''}
                         onChange={(e) =>
                             applyFilter({ status: e.target.value || undefined })
                         }
                     >
-                        <option value="">Semua status</option>
-                        <option value="VALIDATING">Divalidasi</option>
-                        <option value="READY">Siap</option>
-                        <option value="REJECTED">Ditolak</option>
+                        <option value="">All statuses</option>
+                        <option value="VALIDATING">Validating</option>
+                        <option value="READY">Ready</option>
+                        <option value="REJECTED">Rejected</option>
                     </NativeSelect>
                     <NativeSelect
-                        className="w-52"
+                        className="h-9 w-full sm:w-52"
                         value={filters.source_id ?? ''}
                         onChange={(e) =>
                             applyFilter({
@@ -228,7 +281,7 @@ export default function Videos({
                             })
                         }
                     >
-                        <option value="">Semua sumber</option>
+                        <option value="">All sources</option>
                         {sourceList.map((s) => (
                             <option key={s.id} value={s.id}>
                                 {s.name}
@@ -239,20 +292,20 @@ export default function Videos({
 
                 {page.data.length === 0 ? (
                     <EmptyState
-                        title="Belum ada video"
-                        description="Video yang diunggah akan tampil di sini."
+                        title="No videos yet"
+                        description="Uploaded videos appear here."
                     />
                 ) : (
                     <Table>
                         <thead>
                             <tr>
-                                <Th>Nama file</Th>
-                                <Th>Sumber</Th>
+                                <Th>File name</Th>
+                                <Th>Source</Th>
                                 <Th>Status</Th>
-                                <Th>Durasi</Th>
-                                <Th>Ukuran</Th>
-                                <Th>Analisis</Th>
-                                <Th>Diunggah</Th>
+                                <Th>Duration</Th>
+                                <Th>Size</Th>
+                                <Th>Analysis</Th>
+                                <Th>Uploaded</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -300,5 +353,5 @@ export default function Videos({
 }
 
 Videos.layout = {
-    breadcrumbs: [{ title: 'Video & Analisis', href: videos.index() }],
+    breadcrumbs: [{ title: 'Video & Analysis', href: videos.index() }],
 };

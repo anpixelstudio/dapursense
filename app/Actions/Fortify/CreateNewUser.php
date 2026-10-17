@@ -38,9 +38,9 @@ class CreateNewUser implements CreatesNewUsers
             'organization_name' => [Rule::requiredIf(! $joinsInvitation), 'nullable', 'string', 'min:2', 'max:120'],
             'terms' => ['accepted'],
         ], [
-            'terms.accepted' => 'Persetujuan penggunaan wajib dicentang.',
+            'terms.accepted' => 'You must accept the terms of use.',
         ], [
-            'organization_name' => 'nama organisasi',
+            'organization_name' => 'organization name',
         ])->validate();
 
         return DB::transaction(function () use ($input, $joinsInvitation) {

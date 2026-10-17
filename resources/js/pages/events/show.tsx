@@ -14,7 +14,6 @@ import {
 } from '@/components/kitchen/ui';
 import { Button } from '@/components/ui/button';
 import { AssistantMarkdown } from '@/components/assistant-markdown';
-import { loadAssistantLocale } from '@/lib/assistant-i18n';
 import { postAssistant } from '@/lib/assistant';
 import {
     DISMISS_LABELS,
@@ -51,9 +50,9 @@ type Props = {
 };
 
 const MEDIA_ERRORS: Record<string, string> = {
-    PENDING: 'Bukti masih diproses worker.',
-    FAILED: 'Bukti gagal dibuat.',
-    EXPIRED: 'Bukti sudah dihapus sesuai retensi.',
+    PENDING: 'Evidence is still being processed.',
+    FAILED: 'Evidence generation failed.',
+    EXPIRED: 'Evidence removed per retention policy.',
 };
 
 export default function EventShow({
@@ -82,11 +81,11 @@ export default function EventShow({
         try {
             const data = await postAssistant<{ text: string }>(
                 assistant.summarize(event.id).url,
-                { locale: loadAssistantLocale() },
+                { locale: 'en' },
             );
             setSummary(data.text);
         } catch (e) {
-            setSummaryError(e instanceof Error ? e.message : 'Gagal merangkum');
+            setSummaryError(e instanceof Error ? e.message : 'Summarization failed');
         } finally {
             setSummaryBusy(false);
         }
@@ -126,7 +125,7 @@ export default function EventShow({
                     description={
                         isDevice
                             ? `${eventPlace(event)}${event.evidence.host ? ` · ${event.evidence.host as string}:${event.evidence.port as number}` : ''} · ${formatDateTime(event.occurred_at ?? event.created_at, tenant?.timezone)}`
-                            : `${event.source?.name ?? ''} · ${event.run?.video?.original_name ?? ''} · posisi ${formatMs(event.first_ms)}–${formatMs(event.last_ms)}`
+                            : `${event.source?.name ?? ''} · ${event.run?.video?.original_name ?? ''} · position ${formatMs(event.first_ms)}–${formatMs(event.last_ms)}`
                     }
                     actions={
                         <>
@@ -142,8 +141,8 @@ export default function EventShow({
 
                 {event.is_simulation && (
                     <p className="rounded-lg border border-violet-300 bg-violet-50 px-4 py-2 text-sm text-violet-900 dark:bg-violet-950 dark:text-violet-100">
-                        Event ini berasal dari simulator dan bukan deteksi
-                        nyata.
+                        This event came from the simulator, not real
+                        detection.
                     </p>
                 )}
 
@@ -155,20 +154,20 @@ export default function EventShow({
                                 data-test="device-detail"
                             >
                                 <p className="mb-2 font-medium">
-                                    Detail perangkat
+                                    Device details
                                 </p>
                                 <dl className="grid grid-cols-[160px_1fr] gap-y-1 text-muted-foreground">
-                                    <dt>Perangkat</dt>
+                                    <dt>Device</dt>
                                     <dd className="text-foreground">
                                         {eventPlace(event)}
                                     </dd>
-                                    <dt>Alamat</dt>
+                                    <dt>Address</dt>
                                     <dd className="text-foreground">
                                         {event.evidence.host
                                             ? `${event.evidence.host as string}:${event.evidence.port as number}`
-                                            : 'heartbeat / komponen server'}
+                                            : 'heartbeat / server component'}
                                     </dd>
-                                    <dt>Penyebab</dt>
+                                    <dt>Reason</dt>
                                     <dd className="text-foreground">
                                         {deviceErrorLabel(
                                             event.evidence.error as
@@ -176,11 +175,12 @@ export default function EventShow({
                                                 | null,
                                         )}
                                     </dd>
-                                    <dt>Gagal berturut-turut</dt>
+                                    <dt>Consecutive failures</dt>
                                     <dd className="text-foreground">
-                                        {event.evidence.failures as number} kali
+                                        {event.evidence.failures as number}{' '}
+                                        times
                                     </dd>
-                                    <dt>Mulai offline</dt>
+                                    <dt>Offline since</dt>
                                     <dd className="text-foreground">
                                         {formatDateTime(
                                             event.occurred_at,
@@ -192,7 +192,7 @@ export default function EventShow({
                                     href={uptime.index()}
                                     className="mt-3 inline-block text-sm hover:underline"
                                 >
-                                    Buka Uptime Perangkat
+                                    Open Device Uptime
                                 </Link>
                             </div>
                         )}
@@ -206,7 +206,7 @@ export default function EventShow({
                                         <div className="relative overflow-hidden rounded-xl bg-black">
                                             <img
                                                 src={mediaUrl(snapshot.id)}
-                                                alt="Snapshot kejadian"
+                                                alt="Event snapshot"
                                                 className="block w-full"
                                             />
                                             <svg
@@ -259,7 +259,7 @@ export default function EventShow({
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium">
-                                        Klip bukti
+                                        Evidence clip
                                     </p>
                                     {clip?.state === 'READY' ? (
                                         <video
@@ -287,18 +287,18 @@ export default function EventShow({
                         {!isDevice && (
                             <div className="rounded-xl border p-4 text-sm">
                                 <p className="mb-2 font-medium">
-                                    Detail deteksi
+                                    Detection details
                                 </p>
                                 <dl className="grid grid-cols-[160px_1fr] gap-y-1 text-muted-foreground">
-                                    <dt>Orang</dt>
+                                    <dt>Person</dt>
                                     <dd className="text-foreground">
                                         {event.track
-                                            ? `Orang ${event.track.track_key}`
+                                            ? `Person ${event.track.track_key}`
                                             : '-'}
                                     </dd>
                                     {event.evidence.items && (
                                         <>
-                                            <dt>APD</dt>
+                                            <dt>PPE</dt>
                                             <dd className="text-foreground">
                                                 {event.evidence.items
                                                     .map(ppeLabel)
@@ -308,41 +308,41 @@ export default function EventShow({
                                     )}
                                     {event.evidence.zone_name && (
                                         <>
-                                            <dt>Zona</dt>
+                                            <dt>Zone</dt>
                                             <dd className="text-foreground">
                                                 {event.evidence.zone_name}
                                             </dd>
                                         </>
                                     )}
-                                    <dt>Skor tertinggi</dt>
+                                    <dt>Peak score</dt>
                                     <dd className="text-foreground">
                                         {formatPercent(event.peak_score)}
                                     </dd>
-                                    <dt>Status siklus</dt>
+                                    <dt>Lifecycle status</dt>
                                     <dd className="text-foreground">
                                         {lifecycleLabel(event.lifecycle)}
                                     </dd>
-                                    <dt>Waktu kejadian</dt>
+                                    <dt>Event time</dt>
                                     <dd className="text-foreground">
                                         {event.occurred_at
                                             ? formatDateTime(
                                                   event.occurred_at,
                                                   tenant?.timezone,
                                               )
-                                            : 'Waktu rekaman tidak diketahui'}
+                                            : 'Recording time unknown'}
                                     </dd>
                                     <dt>Model</dt>
                                     <dd className="text-foreground">
                                         {event.run?.model?.name}{' '}
                                         {event.run?.model?.version}
                                     </dd>
-                                    <dt>Aturan</dt>
+                                    <dt>Rules</dt>
                                     <dd className="text-foreground">
                                         {ruleRevisionLabel(
                                             event.run?.rule_revision,
                                         )}
                                     </dd>
-                                    <dt>Versi aplikasi</dt>
+                                    <dt>App version</dt>
                                     <dd className="text-foreground">
                                         {event.run?.app_version}
                                     </dd>
@@ -352,7 +352,7 @@ export default function EventShow({
                                         href={analyses.show(event.run.id)}
                                         className="mt-3 inline-block text-sm hover:underline"
                                     >
-                                        Buka timeline analisis
+                                        Open analysis timeline
                                     </Link>
                                 )}
                             </div>
@@ -361,7 +361,7 @@ export default function EventShow({
                         {ppe.length > 0 && (
                             <div className="rounded-xl border p-4 text-sm">
                                 <p className="mb-2 font-medium">
-                                    Penilaian APD orang ini
+                                    PPE assessment for this person
                                 </p>
                                 <ul className="space-y-1">
                                     {ppe.map((p) => (
@@ -372,10 +372,10 @@ export default function EventShow({
                                             <span>
                                                 {ppeLabel(p.item_code)}:{' '}
                                                 {p.state === 'present'
-                                                    ? 'ada'
+                                                    ? 'present'
                                                     : p.state === 'missing'
-                                                      ? 'tidak terdeteksi'
-                                                      : `tidak dapat dinilai${p.reason ? ` (${ppeReasonLabel(p.reason)})` : ''}`}
+                                                      ? 'not detected'
+                                                      : `cannot assess${p.reason ? ` (${ppeReasonLabel(p.reason)})` : ''}`}
                                             </span>
                                             <span className="font-mono text-muted-foreground">
                                                 {formatMs(p.start_ms)}–
@@ -434,14 +434,14 @@ export default function EventShow({
                                 onSubmit={submit}
                                 className="space-y-3 rounded-xl border p-4"
                             >
-                                <p className="font-medium">Keputusan review</p>
+                                <p className="font-medium">Review decision</p>
                                 {form.errors.expected_revision && (
                                     <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
                                         {form.errors.expected_revision}
                                     </p>
                                 )}
                                 <Field
-                                    label="Ubah status ke"
+                                    label="Change status to"
                                     htmlFor="review-status"
                                     error={form.errors.to_status}
                                 >
@@ -467,7 +467,7 @@ export default function EventShow({
                                 </Field>
                                 {form.data.to_status === 'DISMISSED' && (
                                     <Field
-                                        label="Kode alasan"
+                                        label="Reason code"
                                         htmlFor="review-code"
                                         error={form.errors.reason_code}
                                     >
@@ -482,7 +482,7 @@ export default function EventShow({
                                             }
                                         >
                                             <option value="">
-                                                Pilih alasan
+                                                Select a reason
                                             </option>
                                             {dismissReasons.map((r) => (
                                                 <option key={r} value={r}>
@@ -497,8 +497,8 @@ export default function EventShow({
                                         label={
                                             form.data.to_status ===
                                             'ACKNOWLEDGED'
-                                                ? 'Catatan (opsional)'
-                                                : 'Alasan'
+                                                ? 'Notes (optional)'
+                                                : 'Reason'
                                         }
                                         htmlFor="review-reason"
                                         error={form.errors.reason}
@@ -517,7 +517,7 @@ export default function EventShow({
                                 )}
                                 {form.data.to_status === 'RESOLVED' && (
                                     <Field
-                                        label="Tindakan penanganan"
+                                        label="Resolution action"
                                         htmlFor="review-action"
                                         error={form.errors.action_note}
                                     >
@@ -538,12 +538,12 @@ export default function EventShow({
                                     className="w-full"
                                     data-test="submit-review"
                                 >
-                                    Simpan keputusan
+                                    Save decision
                                 </Button>
                                 <p className="text-xs text-muted-foreground">
-                                    Revisi event: {event.revision}. Jika
-                                    reviewer lain mengubah lebih dulu, Anda akan
-                                    diminta memeriksa ulang.
+                                    Event revision: {event.revision}. If
+                                    another reviewer changed it first, you will be
+                                    asked to review again.
                                 </p>
                             </form>
                         )}
@@ -562,27 +562,27 @@ export default function EventShow({
                             >
                                 {event.evidence_hold ? (
                                     <>
-                                        <LockOpen /> Lepas penahanan bukti
+                                        <LockOpen /> Release evidence hold
                                     </>
                                 ) : (
                                     <>
-                                        <Lock /> Tahan bukti dari penghapusan
+                                        <Lock /> Hold evidence from deletion
                                     </>
                                 )}
                             </Button>
                         )}
                         {event.evidence_hold && (
                             <p className="text-xs text-muted-foreground">
-                                Bukti ditahan dan tidak dihapus oleh retensi
-                                otomatis.
+                                Evidence is held and not removed by retention
+                                policy.
                             </p>
                         )}
 
                         <div className="rounded-xl border p-4 text-sm">
-                            <p className="mb-2 font-medium">Riwayat review</p>
+                            <p className="mb-2 font-medium">Review history</p>
                             {(event.reviews ?? []).length === 0 ? (
                                 <p className="text-muted-foreground">
-                                    Belum ada keputusan.
+                                    No decisions yet.
                                 </p>
                             ) : (
                                 <ol className="space-y-3">
@@ -593,7 +593,7 @@ export default function EventShow({
                                         >
                                             <p>
                                                 <span className="font-medium">
-                                                    {r.actor?.name ?? 'Sistem'}
+                                                    {r.actor?.name ?? 'System'}
                                                 </span>
                                                 : {REVIEW_LABELS[r.from_status]}{' '}
                                                 → {REVIEW_LABELS[r.to_status]}
@@ -612,7 +612,7 @@ export default function EventShow({
                                             )}
                                             {r.action_note && (
                                                 <p className="text-muted-foreground">
-                                                    Tindakan: {r.action_note}
+                                                    Action: {r.action_note}
                                                 </p>
                                             )}
                                             <p className="text-xs text-muted-foreground">
@@ -634,5 +634,5 @@ export default function EventShow({
 }
 
 EventShow.layout = {
-    breadcrumbs: [{ title: 'Anomali', href: events.index() }],
+    breadcrumbs: [{ title: 'Anomalies', href: events.index() }],
 };

@@ -48,31 +48,31 @@ type Props = {
 };
 
 const THRESHOLDS: { key: string; label: string; unit: string }[] = [
-    { key: 'grace_ms', label: 'Toleransi awal masuk zona', unit: 'ms' },
-    { key: 'window_ms', label: 'Jendela evaluasi', unit: 'ms' },
+    { key: 'grace_ms', label: 'Grace period entering zone', unit: 'ms' },
+    { key: 'window_ms', label: 'Evaluation window', unit: 'ms' },
     {
         key: 'missing_ratio',
-        label: 'Rasio frame APD tidak terdeteksi',
+        label: 'Frame ratio with PPE not detected',
         unit: '0.5–1',
     },
     {
         key: 'recovery_ms',
-        label: 'Waktu pemulihan sebelum event ditutup',
+        label: 'Recovery time before event closes',
         unit: 'ms',
     },
     {
         key: 'cooldown_ms',
-        label: 'Jeda sebelum event baru orang yang sama',
+        label: 'Cooldown before new event for same person',
         unit: 'ms',
     },
-    { key: 'restricted_dwell_ms', label: 'Lama di area terlarang', unit: 'ms' },
+    { key: 'restricted_dwell_ms', label: 'Time in restricted area', unit: 'ms' },
     {
         key: 'unassessable_ms',
-        label: 'Lama APD tidak dapat dinilai',
+        label: 'Duration PPE cannot be assessed',
         unit: 'ms',
     },
-    { key: 'min_visibility', label: 'Visibilitas minimum', unit: '0–1' },
-    { key: 'max_gap_ms', label: 'Celah tracking maksimum', unit: 'ms' },
+    { key: 'min_visibility', label: 'Minimum visibility', unit: '0–1' },
+    { key: 'max_gap_ms', label: 'Maximum tracking gap', unit: 'ms' },
 ];
 
 function RuleEditor({
@@ -124,14 +124,14 @@ function RuleEditor({
         <div className="space-y-4">
             <div>
                 <p className="mb-2 text-sm font-medium">
-                    APD wajib per jenis zona
+                    Required PPE per zone type
                 </p>
                 <div className="overflow-x-auto rounded-xl border">
                     <table className="w-full text-sm">
                         <thead>
                             <tr>
                                 <th className="border-b px-3 py-2 text-left font-medium text-muted-foreground">
-                                    Zona
+                                    Zones
                                 </th>
                                 {ppeItems.map((i) => (
                                     <th
@@ -175,14 +175,13 @@ function RuleEditor({
                     </table>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                    Area terlarang selalu memicu event setelah orang berada di
-                    dalamnya melebihi durasi minimum.
+                    Restricted areas always raise an event after a person stays inside beyond the minimum duration.
                 </p>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
                 <Field
-                    label="Sampling (frame/detik)"
+                    label="Sampling (frames/sec)"
                     htmlFor={`${ruleSet.id}-fps`}
                     error={errors['config.sampling_fps']}
                 >
@@ -228,7 +227,7 @@ function RuleEditor({
                 {['ppe_missing', 'restricted_zone'].map((type) => (
                     <Field
                         key={type}
-                        label={`Tingkat ${type === 'ppe_missing' ? 'APD tidak terdeteksi' : 'area terlarang'}`}
+                        label={`Level ${type === 'ppe_missing' ? 'PPE not detected' : 'restricted area'}`}
                         htmlFor={`${ruleSet.id}-sev-${type}`}
                     >
                         <NativeSelect
@@ -245,9 +244,9 @@ function RuleEditor({
                                 })
                             }
                         >
-                            <option value="low">Rendah</option>
-                            <option value="medium">Sedang</option>
-                            <option value="high">Tinggi</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
                         </NativeSelect>
                     </Field>
                 ))}
@@ -255,7 +254,7 @@ function RuleEditor({
 
             {Object.keys(errors).length > 0 && (
                 <p className="text-sm text-destructive">
-                    Periksa kembali nilai yang ditandai.
+                    Review the highlighted values.
                 </p>
             )}
             {canEdit && (
@@ -264,13 +263,11 @@ function RuleEditor({
                     disabled={processing}
                     data-test="publish-rules"
                 >
-                    Terbitkan revisi baru
+                    Publish new revision
                 </Button>
             )}
             <p className="text-xs text-muted-foreground">
-                Revisi tidak mengubah hasil analisis lama; setiap run menyimpan
-                snapshot aturan yang dipakai. Nilai awal adalah titik mulai dan
-                perlu dikalibrasi dengan video dapur Anda.
+                Revisions do not change past analysis results; each run stores the rule snapshot used. Defaults are a starting point and should be calibrated with your kitchen footage.
             </p>
         </div>
     );
@@ -283,16 +280,16 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
 
     return (
         <>
-            <Head title="Aturan SOP & Model" />
+            <Head title="SOP Rules & Models" />
             <Page>
                 <PageHeader
-                    title="Aturan SOP & Model"
-                    description="Aturan menentukan APD wajib per zona dan ambang waktu sebelum kandidat pelanggaran dibuat."
+                    title="SOP Rules & Models"
+                    description="Rules define required PPE per zone and time thresholds before violation candidates are created."
                 />
 
                 {canEdit && (
                     <form
-                        className="flex flex-wrap items-end gap-3"
+                        className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.post(rules.store().url, {
@@ -301,21 +298,29 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
                             });
                         }}
                     >
-                        <Field
-                            label="Rule set baru (dari template)"
-                            htmlFor="ruleset-name"
-                            error={form.errors.name}
-                        >
-                            <Input
-                                id="ruleset-name"
-                                className="w-72"
-                                value={form.data.name}
-                                onChange={(e) =>
-                                    form.setData('name', e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Button disabled={form.processing}>Buat</Button>
+                        <div className="grid gap-4 sm:grid-cols-2 items-start">
+                            <Field
+                                label="New rule set (from template)"
+                                htmlFor="ruleset-name"
+                                error={form.errors.name}
+                            >
+                                <Input
+                                    id="ruleset-name"
+                                    value={form.data.name}
+                                    onChange={(e) =>
+                                        form.setData('name', e.target.value)
+                                    }
+                                />
+                            </Field>
+                        </div>
+                        <div className="flex justify-end border-t pt-4">
+                            <Button
+                                className="h-9 min-w-24"
+                                disabled={form.processing}
+                            >
+                                Create
+                            </Button>
+                        </div>
                     </form>
                 )}
 
@@ -328,11 +333,11 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
                             <h2 className="font-medium">{set.name}</h2>
                             {set.active_revision && (
                                 <Pill tone="success">
-                                    Aktif: revisi {set.active_revision.version}
+                                    Active: rev {set.active_revision.version}
                                 </Pill>
                             )}
                             <span className="text-xs text-muted-foreground">
-                                {set.revisions.length} revisi · terakhir{' '}
+                                {set.revisions.length} revisions · last{' '}
                                 {formatDateTime(
                                     set.active_revision?.created_at,
                                     tenant?.timezone,
@@ -348,14 +353,14 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
                             />
                         ) : (
                             <p className="text-sm text-muted-foreground">
-                                Belum ada revisi.
+                                No revisions yet.
                             </p>
                         )}
                     </section>
                 ))}
 
                 <section className="space-y-3">
-                    <h2 className="font-medium">Model AI terdaftar</h2>
+                    <h2 className="font-medium">Registered AI models</h2>
                     <div className="grid gap-3 md:grid-cols-2">
                         {models.map((m) => (
                             <div
@@ -381,16 +386,16 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
                                     {m.capabilities.notes}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    APD didukung:{' '}
+                                    PPE supported:{' '}
                                     {Object.entries(m.capabilities.ppe ?? {})
                                         .filter(([, ok]) => ok)
                                         .map(([i]) => ppeLabel(i))
                                         .join(', ') ||
-                                        'tidak ada (APD dinilai tidak dapat dinilai)'}
+                                        'none (PPE assessed as cannot assess)'}
                                 </p>
                                 {m.license_ref && (
                                     <p className="text-xs text-muted-foreground">
-                                        Lisensi: {m.license_ref}
+                                        License: {m.license_ref}
                                     </p>
                                 )}
                             </div>
@@ -403,5 +408,5 @@ export default function Rules({ ruleSets, models, ppeItems }: Props) {
 }
 
 Rules.layout = {
-    breadcrumbs: [{ title: 'Aturan SOP & Model', href: rules.index() }],
+    breadcrumbs: [{ title: 'SOP Rules & Models', href: rules.index() }],
 };

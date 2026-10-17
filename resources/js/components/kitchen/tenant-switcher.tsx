@@ -46,7 +46,7 @@ export function TenantSwitcher() {
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="min-w-56" align="start">
-                        <DropdownMenuLabel>Organisasi</DropdownMenuLabel>
+                        <DropdownMenuLabel>Organization</DropdownMenuLabel>
                         {memberships.map((m) => (
                             <DropdownMenuItem
                                 key={m.tenant_id}

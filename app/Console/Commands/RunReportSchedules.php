@@ -8,12 +8,12 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('reports:run-schedules')]
-#[Description('Buat laporan terjadwal harian/mingguan yang sudah jatuh tempo')]
+#[Description('Generate due daily/weekly scheduled reports')]
 class RunReportSchedules extends Command
 {
     public function handle(ReportScheduler $scheduler): int
     {
-        $this->info('Laporan terjadwal dibuat: '.$scheduler->runDue());
+        $this->info('Scheduled reports generated: '.$scheduler->runDue());
 
         return self::SUCCESS;
     }

@@ -27,7 +27,7 @@ class OrganizationController extends Controller
             ->where('tenant_id', $validated['tenant_id'])
             ->first();
 
-        abort_if($membership === null, 403, 'Anda bukan anggota aktif organisasi tersebut.');
+        abort_if($membership === null, 403, 'You are not an active member of that organization.');
 
         $request->session()->put(ResolveTenantContext::SESSION_KEY, $membership->tenant_id);
 

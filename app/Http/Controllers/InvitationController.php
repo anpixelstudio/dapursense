@@ -40,8 +40,8 @@ class InvitationController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            abort_if($invitation === null || ! $invitation->isUsable(), 410, 'Undangan tidak berlaku atau sudah dipakai.');
-            abort_if(strtolower($user->email) !== $invitation->email, 403, 'Undangan ini untuk email lain.');
+            abort_if($invitation === null || ! $invitation->isUsable(), 410, 'Invitation is invalid or already used.');
+            abort_if(strtolower($user->email) !== $invitation->email, 403, 'This invitation is for a different email address.');
 
             $invitation->update(['accepted_at' => now()]);
 
@@ -56,7 +56,7 @@ class InvitationController extends Controller
         });
 
         $request->session()->put(ResolveTenantContext::SESSION_KEY, $membership->tenant_id);
-        $this->toast('Anda sekarang bergabung dengan organisasi.');
+        $this->toast('You have joined the organization.');
 
         return redirect()->route('dashboard');
     }

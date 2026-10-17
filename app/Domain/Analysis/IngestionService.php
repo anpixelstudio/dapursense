@@ -48,13 +48,13 @@ class IngestionService
                     return IngestionResult::ok(['replayed' => true, 'last_batch_sequence' => $run->last_batch_sequence]);
                 }
 
-                $this->failRun($run, 'payload_conflict', 'Batch dengan sequence sama dikirim dengan isi berbeda.');
+                $this->failRun($run, 'payload_conflict', 'A batch with the same sequence was resent with different content.');
 
-                return IngestionResult::conflict('payload_conflict', 'Isi batch berbeda dari batch yang sudah diterima.');
+                return IngestionResult::conflict('payload_conflict', 'Batch payload differs from the batch already accepted.');
             }
 
             if ($sequence !== $run->last_batch_sequence + 1) {
-                return IngestionResult::conflict('sequence_gap', 'Urutan batch tidak sesuai.', [
+                return IngestionResult::conflict('sequence_gap', 'Batch sequence is out of order.', [
                     'expected_sequence' => $run->last_batch_sequence + 1,
                 ]);
             }
@@ -109,7 +109,7 @@ class IngestionService
             }
 
             if ((int) $payload['final_batch_sequence'] !== $run->last_batch_sequence) {
-                return IngestionResult::conflict('sequence_gap', 'Masih ada batch yang belum diterima.', [
+                return IngestionResult::conflict('sequence_gap', 'Some batches have not been received yet.', [
                     'expected_sequence' => $run->last_batch_sequence + 1,
                 ]);
             }
@@ -127,7 +127,7 @@ class IngestionService
                     ->exists();
 
                 if ($pending) {
-                    return IngestionResult::conflict('evidence_pending', 'Bukti video masih diproses; run belum dapat diselesaikan.');
+                    return IngestionResult::conflict('evidence_pending', 'Video evidence is still processing; the run cannot be completed yet.');
                 }
             }
 
@@ -166,11 +166,11 @@ class IngestionService
     private function guard(AnalysisRun $run, int $attempt): ?IngestionResult
     {
         if ($attempt !== $run->attempt) {
-            return IngestionResult::conflict('stale_attempt', 'Attempt ini sudah tidak aktif.', ['active_attempt' => $run->attempt]);
+            return IngestionResult::conflict('stale_attempt', 'This attempt is no longer active.', ['active_attempt' => $run->attempt]);
         }
 
         if ($run->status !== RunStatus::Running) {
-            return IngestionResult::conflict('run_not_active', 'Run tidak dalam status RUNNING.', ['status' => $run->status->value]);
+            return IngestionResult::conflict('run_not_active', 'Run is not in RUNNING status.', ['status' => $run->status->value]);
         }
 
         return null;

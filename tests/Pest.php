@@ -57,8 +57,8 @@ function tenantOf(User $user): Tenant
 /** @return array{property: Property, kitchen: Kitchen, source: MediaSource} */
 function makeLocation(Tenant $tenant): array
 {
-    $property = Property::query()->create(['tenant_id' => $tenant->id, 'name' => 'Properti', 'timezone' => 'Asia/Jakarta']);
-    $kitchen = Kitchen::query()->create(['tenant_id' => $tenant->id, 'property_id' => $property->id, 'name' => 'Dapur Utama']);
+    $property = Property::query()->create(['tenant_id' => $tenant->id, 'name' => 'Property', 'timezone' => 'Asia/Jakarta']);
+    $kitchen = Kitchen::query()->create(['tenant_id' => $tenant->id, 'property_id' => $property->id, 'name' => 'Main Kitchen']);
     $source = MediaSource::query()->create(['tenant_id' => $tenant->id, 'kitchen_id' => $kitchen->id, 'name' => 'Kamera 1', 'type' => 'upload']);
 
     return compact('property', 'kitchen', 'source');

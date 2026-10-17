@@ -120,7 +120,7 @@ class UptimeController extends Controller
 
         Audit::log('device.created', $device);
         $this->flashToken($device, $token);
-        $this->toast('Perangkat ditambahkan; pengecekan pertama berjalan dalam 1 menit.');
+        $this->toast('Device added; the first check runs within 1 minute.');
 
         return back();
     }
@@ -143,7 +143,7 @@ class UptimeController extends Controller
 
         $device->update($data);
         Audit::log('device.updated', $device, $device->getChanges());
-        $this->toast('Perangkat diperbarui.');
+        $this->toast('Device updated.');
 
         return back();
     }
@@ -166,7 +166,7 @@ class UptimeController extends Controller
         $this->authorizePermission(Permission::ManageSources, $device);
 
         if ($device->check_type === 'system') {
-            return back()->withErrors(['device' => 'Komponen server dipantau otomatis dan tidak dapat dihapus; jeda saja bila perlu.']);
+            return back()->withErrors(['device' => 'Server components are monitored automatically and cannot be deleted; pause them if needed.']);
         }
 
         DB::transaction(function () use ($device) {
@@ -176,7 +176,7 @@ class UptimeController extends Controller
         });
 
         Audit::log('device.deleted', $device);
-        $this->toast('Perangkat dihapus.');
+        $this->toast('Device removed.');
 
         return back();
     }
@@ -198,7 +198,7 @@ class UptimeController extends Controller
     {
         return [
             'host.regex' => 'Isi alamat IP atau hostname tanpa http:// atau path.',
-            'host.not_regex' => 'Alamat ini bukan alamat perangkat yang valid.',
+            'host.not_regex' => 'This is not a valid device address.',
         ];
     }
 

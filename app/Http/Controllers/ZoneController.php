@@ -19,7 +19,7 @@ class ZoneController extends Controller
 
         $zone = Zone::query()->create($this->validated($request) + ['source_id' => $source->id, 'revision' => 1]);
         Audit::log('zone.created', $zone);
-        $this->toast('Zona disimpan.');
+        $this->toast('Zone saved.');
 
         return back();
     }
@@ -35,7 +35,7 @@ class ZoneController extends Controller
 
         $zone->update($validated);
         Audit::log('zone.updated', $zone, ['revision' => $zone->revision]);
-        $this->toast('Zona diperbarui; analisis berikutnya memakai revisi baru.');
+        $this->toast('Zone updated; the next analysis will use the new revision.');
 
         return back();
     }
@@ -46,7 +46,7 @@ class ZoneController extends Controller
 
         $zone->update(['active' => false]);
         Audit::log('zone.deactivated', $zone);
-        $this->toast('Zona dinonaktifkan. Hasil analisis lama tetap memakai snapshot zona.');
+        $this->toast('Zone deactivated. Past analysis results still use the zone snapshot.');
 
         return back();
     }
@@ -58,7 +58,7 @@ class ZoneController extends Controller
         $validated = $request->validate([
             'target_source_id' => ['required', 'uuid', Rule::notIn([$zone->source_id]),
                 Rule::exists('media_sources', 'id')->where('tenant_id', $this->tenantId())],
-        ], ['target_source_id.not_in' => 'Pilih sumber dengan sudut kamera lain.']);
+        ], ['target_source_id.not_in' => 'Choose a source with a different camera angle.']);
 
         $copy = Zone::query()->create([
             'source_id' => $validated['target_source_id'],
@@ -68,7 +68,7 @@ class ZoneController extends Controller
             'revision' => 1,
         ]);
         Audit::log('zone.duplicated', $copy, ['from' => $zone->id]);
-        $this->toast('Zona disalin. Sesuaikan polygon dengan sudut kamera sumber tujuan.');
+        $this->toast('Zone copied. Adjust the polygon for the destination camera angle.');
 
         return back();
     }

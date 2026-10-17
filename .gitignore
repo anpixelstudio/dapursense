@@ -49,3 +49,4 @@ yarn-error.log
 !/storage/logs/.gitignore
 /storage/framework/views/*.php
 /storage/inertia-devtools/
+/samples/kitchen/*.mp4

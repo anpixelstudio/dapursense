@@ -90,6 +90,40 @@ else
     echo "Model overhead YOLOX-WholeBody12 belum ada (opsional). Unduh dengan: WHOLEBODY=1 ./start.sh"
 fi
 
+PPE_FILE=ai-service/models/hairnet_gloves_yolov8.onnx
+PPE_SHA=028bf2f5c42ea4c68f6b988ab26209a5e92d3618efc1257e5ff7116725b3866b
+PPE_PT=ai-service/models/hairnet_gloves_yolov8.pt
+if [[ ! -f "$PPE_FILE" && "${KITCHEN_PPE:-0}" == "1" ]]; then
+    echo "Menyiapkan model APD dapur (hairnet/gloves YOLOv8 → ONNX)..."
+    mkdir -p ai-service/models
+    if [[ ! -f "$PPE_PT" ]]; then
+        curl -fsSL -o "$PPE_PT" \
+            https://huggingface.co/KhawlaQuraan/hairnet-gloves-yolov8-v6/resolve/main/best.pt
+    fi
+    if [[ -x ai-service/.venv/bin/python ]]; then
+        PY=ai-service/.venv/bin/python
+    else
+        PY=python3
+    fi
+    "$PY" - <<'PY'
+from pathlib import Path
+from ultralytics import YOLO
+pt = Path("ai-service/models/hairnet_gloves_yolov8.pt")
+out = Path("ai-service/models/hairnet_gloves_yolov8.onnx")
+path = YOLO(str(pt)).export(format="onnx", imgsz=640, simplify=True, opset=12)
+Path(path).replace(out)
+print("exported", out)
+PY
+fi
+if [[ -f "$PPE_FILE" ]]; then
+    if [[ "$(shasum -a 256 "$PPE_FILE" | cut -d' ' -f1)" != "$PPE_SHA" ]]; then
+        echo "Checksum $PPE_FILE tidak cocok; hapus file itu lalu jalankan ulang dengan KITCHEN_PPE=1."
+        exit 1
+    fi
+else
+    echo "Model APD dapur belum ada (opsional). Unduh/export dengan: KITCHEN_PPE=1 ./start.sh"
+fi
+
 if [[ ! -f public/build/manifest.json ]]; then
     echo "Build frontend belum ada, menjalankan npm run build..."
     npm run build

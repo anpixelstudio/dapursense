@@ -108,7 +108,7 @@ class DispatchRunJob implements ShouldQueue
                 'status' => RunStatus::Failed->value,
                 'phase' => 'failed',
                 'error_code' => 'worker_unreachable',
-                'error_message' => 'Worker AI tidak dapat dihubungi setelah beberapa percobaan.',
+                'error_message' => 'AI worker could not be reached after several attempts.',
                 'finished_at' => now(),
             ]);
     }

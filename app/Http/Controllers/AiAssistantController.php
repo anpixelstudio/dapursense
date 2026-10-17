@@ -342,13 +342,13 @@ class AiAssistantController extends Controller
     private function eventTypeLabel(string $type): string
     {
         return match ($type) {
-            'ppe_missing' => 'APD tidak terdeteksi',
-            'restricted_zone' => 'Masuk area terlarang',
-            'unassessable_ppe' => 'APD tidak dapat dinilai',
-            'source_unreadable' => 'Video tidak terbaca',
-            'observation_lost' => 'Pengamatan terputus',
-            'analysis_stalled' => 'Analisis macet',
-            'device_offline' => 'Perangkat offline',
+            'ppe_missing' => 'PPE not detected',
+            'restricted_zone' => 'Restricted zone entry',
+            'unassessable_ppe' => 'PPE could not be assessed',
+            'source_unreadable' => 'Video unreadable',
+            'observation_lost' => 'Observation lost',
+            'analysis_stalled' => 'Analysis stalled',
+            'device_offline' => 'Device offline',
             default => $type,
         };
     }
@@ -357,7 +357,7 @@ class AiAssistantController extends Controller
     {
         $message = $e instanceof RuntimeException
             ? $e->getMessage()
-            : 'Layanan Gen AI gagal merespons.';
+            : 'Gen AI service failed to respond.';
 
         return response()->json([
             'message' => $message,

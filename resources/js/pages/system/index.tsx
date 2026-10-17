@@ -90,7 +90,7 @@ function Check({
                     </span>
                 )}
                 <Pill tone={!ok ? 'danger' : warning ? 'warning' : 'success'}>
-                    {!ok ? 'Bermasalah' : warning ? 'Peringatan' : 'OK'}
+                    {!ok ? 'Issue' : warning ? 'Warning' : 'OK'}
                 </Pill>
             </span>
         </div>
@@ -110,19 +110,19 @@ export default function System({
 
     return (
         <>
-            <Head title="Sistem" />
+            <Head title="System" />
             <Page>
                 <PageHeader
-                    title="Sistem"
-                    description={`Versi ${status.app_version}${status.tagged_release ? '' : ' (build pengembangan)'}${status.git_sha ? ` · ${status.git_sha.slice(0, 8)}` : ''}`}
+                    title="System"
+                    description={`Version ${status.app_version}${status.tagged_release ? '' : ' (development build)'}${status.git_sha ? ` · ${status.git_sha.slice(0, 8)}` : ''}`}
                 />
 
                 {!status.real_detection_model && (
                     <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
-                        Belum ada model deteksi APD tervalidasi. Analisis nyata
-                        hanya mendeteksi orang; penilaian APD akan berstatus
-                        "tidak dapat dinilai". Gunakan mode simulasi untuk demo
-                        alur.
+                        No validated PPE detection model yet. Real analysis
+                        detects people only; PPE assessment will be marked
+                        "cannot assess". Use simulation mode for workflow
+                        demos.
                     </p>
                 )}
 
@@ -131,20 +131,20 @@ export default function System({
                         ok={status.services.database}
                         label="Database PostgreSQL"
                     />
-                    <Check ok={status.services.redis} label="Redis (antrean)" />
+                    <Check ok={status.services.redis} label="Redis (queue)" />
                     <Check
                         ok={!status.services.storage_blocked}
                         warning={status.services.storage_warning}
-                        label="Penyimpanan"
-                        detail={`${status.services.storage_used_percent.toFixed(1)}% terpakai${status.services.storage_blocked ? ' · upload diblokir' : status.services.storage_warning ? ' · hampir penuh' : ''}`}
+                        label="Storage"
+                        detail={`${status.services.storage_used_percent.toFixed(1)}% used${status.services.storage_blocked ? ' · uploads blocked' : status.services.storage_warning ? ' · nearly full' : ''}`}
                     />
                     <Check
                         ok={worker?.ok ?? false}
                         label="Worker AI"
                         detail={
                             worker
-                                ? `kontrak v${worker.contract_version ?? '?'} (app v${contractVersion})${worker.error ? ` · ${worker.error}` : ''}`
-                                : 'tidak dicek'
+                                ? `contract v${worker.contract_version ?? '?'} (app v${contractVersion})${worker.error ? ` · ${worker.error}` : ''}`
+                                : 'not checked'
                         }
                     />
                     <Check
@@ -158,7 +158,7 @@ export default function System({
                     />
                     <Check
                         ok={status.analysis_ready}
-                        label="Siap analisis"
+                        label="Ready for analysis"
                         detail={
                             status.analysis_paused
                                 ? 'dijeda (upgrade)'
@@ -172,15 +172,15 @@ export default function System({
                     <div className="rounded-lg border border-destructive/40 p-4 text-sm">
                         {status.schema.pending_migrations.length > 0 && (
                             <p>
-                                Migrasi tertunda:{' '}
+                                Pending migrations:{' '}
                                 {status.schema.pending_migrations.join(', ')}.
-                                Jalankan <code>php artisan system:upgrade</code>
+                                Run <code>php artisan system:upgrade</code>
                                 .
                             </p>
                         )}
                         {status.schema.modified_migrations.length > 0 && (
                             <p className="text-destructive">
-                                Migrasi yang sudah terpasang berubah:{' '}
+                                Installed migrations changed:{' '}
                                 {status.schema.modified_migrations.join(', ')}.
                             </p>
                         )}
@@ -188,14 +188,14 @@ export default function System({
                 )}
 
                 <section className="space-y-2">
-                    <h2 className="font-medium">Riwayat rilis</h2>
+                    <h2 className="font-medium">Release history</h2>
                     <Table>
                         <thead>
                             <tr>
-                                <Th>Versi</Th>
+                                <Th>Version</Th>
                                 <Th>Git</Th>
                                 <Th>Schema hash</Th>
-                                <Th>Dipasang</Th>
+                                <Th>Installed</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -223,16 +223,16 @@ export default function System({
                 {isPlatformAdmin && installations.length > 0 && (
                     <section className="space-y-2">
                         <h2 className="font-medium">
-                            Operasi install / upgrade
+                            Install / upgrade operations
                         </h2>
                         <Table>
                             <thead>
                                 <tr>
-                                    <Th>Operasi</Th>
-                                    <Th>Versi</Th>
+                                    <Th>Operation</Th>
+                                    <Th>Version</Th>
                                     <Th>Status</Th>
-                                    <Th>Langkah terakhir</Th>
-                                    <Th>Mulai</Th>
+                                    <Th>Last step</Th>
+                                    <Th>Started</Th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -273,11 +273,11 @@ export default function System({
                 )}
 
                 <section className="space-y-2">
-                    <h2 className="font-medium">Audit log organisasi</h2>
+                    <h2 className="font-medium">Organization audit log</h2>
                     <Table>
                         <thead>
                             <tr>
-                                <Th>Waktu</Th>
+                                <Th>Time</Th>
                                 <Th>Pelaku</Th>
                                 <Th>Aksi</Th>
                                 <Th>Objek</Th>
@@ -292,7 +292,7 @@ export default function System({
                                             tenant?.timezone,
                                         )}
                                     </Td>
-                                    <Td>{a.actor?.name ?? 'Sistem'}</Td>
+                                    <Td>{a.actor?.name ?? 'System'}</Td>
                                     <Td>
                                         <span title={a.action}>
                                             {auditActionLabel(a.action)}
@@ -312,5 +312,5 @@ export default function System({
 }
 
 System.layout = {
-    breadcrumbs: [{ title: 'Sistem', href: system.index() }],
+    breadcrumbs: [{ title: 'System', href: system.index() }],
 };

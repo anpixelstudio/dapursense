@@ -19,9 +19,9 @@ class InvitationNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Undangan bergabung ke '.$this->invitation->tenant->name)
-            ->line('Anda diundang bergabung sebagai '.$this->invitation->role->label().'.')
-            ->action('Terima undangan', route('invitations.show', $this->token))
-            ->line('Tautan berlaku sampai '.$this->invitation->expires_at->toDayDateTimeString().' dan hanya dapat dipakai sekali.');
+            ->subject('Invitation to join '.$this->invitation->tenant->name)
+            ->line('You have been invited to join as '.$this->invitation->role->label().'.')
+            ->action('Accept invitation', route('invitations.show', $this->token))
+            ->line('This link is valid until '.$this->invitation->expires_at->toDayDateTimeString().' and can only be used once.');
     }
 }

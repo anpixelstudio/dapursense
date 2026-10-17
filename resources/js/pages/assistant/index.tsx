@@ -5,7 +5,6 @@ import {
     Copy,
     FileText,
     HelpCircle,
-    Languages,
     MessageSquare,
     Plus,
     Send,
@@ -45,12 +44,7 @@ import {
     type ChatThread,
     type ChatTurn,
 } from '@/lib/assistant-history';
-import {
-    assistantCopy,
-    loadAssistantLocale,
-    saveAssistantLocale,
-    type AssistantLocale,
-} from '@/lib/assistant-i18n';
+import { assistantCopy } from '@/lib/assistant-i18n';
 import { postAssistant } from '@/lib/assistant';
 import { cn } from '@/lib/utils';
 import assistant from '@/routes/assistant';
@@ -68,8 +62,7 @@ export default function AssistantIndex({
     model: string;
     ready: boolean;
 }) {
-    const [locale, setLocale] = useState<AssistantLocale>('en');
-    const t = useMemo(() => assistantCopy(locale), [locale]);
+    const t = useMemo(() => assistantCopy('en'), []);
 
     const [mode, setMode] = useState<Mode>('chat');
     const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -113,7 +106,6 @@ export default function AssistantIndex({
     );
 
     useEffect(() => {
-        setLocale(loadAssistantLocale());
         const existing = listThreads();
         if (existing.length === 0) {
             const thread = createThread();
@@ -135,11 +127,6 @@ export default function AssistantIndex({
             document.getElementById('sop-message')?.focus();
         }
     }, [mode, activeId]);
-
-    const changeLocale = (next: AssistantLocale) => {
-        setLocale(next);
-        saveAssistantLocale(next);
-    };
 
     const persist = (turns: ChatTurn[], threadId: string | null = activeId) => {
         if (!threadId) {
@@ -208,7 +195,7 @@ export default function AssistantIndex({
                 assistant.chat().url,
                 {
                     message: text,
-                    locale,
+                    locale: 'en',
                     history: history.slice(-8),
                 },
             );
@@ -247,7 +234,7 @@ export default function AssistantIndex({
         try {
             const data = await postAssistant<{ text: string }>(
                 assistant.dailyReport().url,
-                { focus, locale },
+                { focus, locale: 'en' },
             );
             setReport(data.text);
         } catch (e) {
@@ -296,26 +283,6 @@ export default function AssistantIndex({
                         </h1>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <ToggleGroup
-                            type="single"
-                            variant="outline"
-                            size="sm"
-                            value={locale}
-                            onValueChange={(value) => {
-                                if (value === 'en' || value === 'id') {
-                                    changeLocale(value);
-                                }
-                            }}
-                            aria-label="Language"
-                        >
-                            <ToggleGroupItem value="en" aria-label="English">
-                                <Languages />
-                                EN
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="id" aria-label="Indonesia">
-                                ID
-                            </ToggleGroupItem>
-                        </ToggleGroup>
                         <ToggleGroup
                             type="single"
                             variant="outline"

@@ -11,7 +11,13 @@ from . import CONTRACT_VERSION
 from .config import Settings
 
 ALIVE_SECONDS = 30
-MODELS = ["anpixel-simulator", "opencv-hog-person", "yolox-nano-person", "yolox-wholebody12-n"]
+MODELS = [
+    "anpixel-simulator",
+    "opencv-hog-person",
+    "yolox-nano-person",
+    "yolox-wholebody12-n",
+    "yolox-kitchen-ppe",
+]
 
 
 class RunRequest(BaseModel):

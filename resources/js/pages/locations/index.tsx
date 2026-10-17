@@ -1,5 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmDialog } from '@/components/kitchen/confirm-dialog';
 import {
     EmptyState,
     Field,
@@ -16,6 +18,8 @@ import locations from '@/routes/locations';
 import properties from '@/routes/properties';
 import type { Property } from '@/types/kitchen';
 
+type PendingDelete = { url: string; label: string } | null;
+
 export default function Locations({
     properties: list,
     timezones,
@@ -25,6 +29,7 @@ export default function Locations({
 }) {
     const { can, tenant } = useTenant();
     const canManage = can('manage_locations');
+    const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
 
     const propertyForm = useForm({
         name: '',
@@ -40,25 +45,37 @@ export default function Locations({
         kitchenForm.data.property_id || (list[0]?.id ?? '');
 
     const remove = (url: string, label: string) => {
-        if (confirm(`Hapus ${label}?`)) {
-            router.delete(url, { preserveScroll: true });
-        }
+        setPendingDelete({ url, label });
     };
 
     return (
         <>
-            <Head title="Lokasi" />
+            <Head title="Locations" />
+            <ConfirmDialog
+                open={pendingDelete !== null}
+                onOpenChange={(open) => !open && setPendingDelete(null)}
+                title={`Delete ${pendingDelete?.label ?? 'item'}?`}
+                description="This cannot be undone. Related kitchens, sources, or zones may be affected."
+                confirmLabel="Delete"
+                onConfirm={() => {
+                    if (!pendingDelete) {
+                        return;
+                    }
+                    router.delete(pendingDelete.url, { preserveScroll: true });
+                    setPendingDelete(null);
+                }}
+            />
             <Page>
                 <PageHeader
-                    title="Lokasi"
-                    description="Properti (outlet/hotel) dan dapur di dalamnya. Zona waktu properti dipakai untuk laporan dan jadwal."
+                    title="Locations"
+                    description="Properties (outlets/hotels) and kitchens inside them. Property timezone is used for reports and schedules."
                 />
                 <PageErrors keys={['property', 'kitchen']} />
 
                 {canManage && (
                     <div className="grid gap-4 lg:grid-cols-2">
                         <form
-                            className="space-y-3 rounded-xl border p-4"
+                            className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 propertyForm.post(properties.store().url, {
@@ -68,9 +85,9 @@ export default function Locations({
                                 });
                             }}
                         >
-                            <p className="font-medium">Tambah properti</p>
+                            <p className="font-medium">Add property</p>
                             <Field
-                                label="Nama properti"
+                                label="Property name"
                                 htmlFor="property-name"
                                 error={propertyForm.errors.name}
                             >
@@ -86,7 +103,7 @@ export default function Locations({
                                 />
                             </Field>
                             <Field
-                                label="Alamat"
+                                label="Address"
                                 htmlFor="property-address"
                                 error={propertyForm.errors.address}
                             >
@@ -102,7 +119,7 @@ export default function Locations({
                                 />
                             </Field>
                             <Field
-                                label="Zona waktu"
+                                label="Timezone"
                                 htmlFor="property-tz"
                                 error={propertyForm.errors.timezone}
                             >
@@ -121,16 +138,19 @@ export default function Locations({
                                     ))}
                                 </NativeSelect>
                             </Field>
-                            <Button
-                                disabled={propertyForm.processing}
-                                data-test="add-property"
-                            >
-                                Simpan properti
-                            </Button>
+                            <div className="flex justify-end border-t pt-4">
+                                <Button
+                                    className="h-9"
+                                    disabled={propertyForm.processing}
+                                    data-test="add-property"
+                                >
+                                    Save property
+                                </Button>
+                            </div>
                         </form>
 
                         <form
-                            className="space-y-3 rounded-xl border p-4"
+                            className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 kitchenForm.transform((data) => ({
@@ -147,9 +167,9 @@ export default function Locations({
                                 });
                             }}
                         >
-                            <p className="font-medium">Tambah dapur</p>
+                            <p className="font-medium">Add kitchen</p>
                             <Field
-                                label="Properti"
+                                label="Property"
                                 htmlFor="kitchen-property"
                                 error={kitchenForm.errors.property_id}
                             >
@@ -163,7 +183,7 @@ export default function Locations({
                                         )
                                     }
                                 >
-                                    <option value="">Pilih properti</option>
+                                    <option value="">Select property</option>
                                     {list.map((p) => (
                                         <option key={p.id} value={p.id}>
                                             {p.name}
@@ -172,7 +192,7 @@ export default function Locations({
                                 </NativeSelect>
                             </Field>
                             <Field
-                                label="Nama dapur"
+                                label="Kitchen name"
                                 htmlFor="kitchen-name"
                                 error={kitchenForm.errors.name}
                             >
@@ -188,7 +208,7 @@ export default function Locations({
                                 />
                             </Field>
                             <Field
-                                label="Keterangan"
+                                label="Description"
                                 htmlFor="kitchen-desc"
                                 error={kitchenForm.errors.description}
                             >
@@ -203,22 +223,26 @@ export default function Locations({
                                     }
                                 />
                             </Field>
-                            <Button
-                                disabled={
-                                    kitchenForm.processing || list.length === 0
-                                }
-                                data-test="add-kitchen"
-                            >
-                                Simpan dapur
-                            </Button>
+                            <div className="flex justify-end border-t pt-4">
+                                <Button
+                                    className="h-9"
+                                    disabled={
+                                        kitchenForm.processing ||
+                                        list.length === 0
+                                    }
+                                    data-test="add-kitchen"
+                                >
+                                    Save kitchen
+                                </Button>
+                            </div>
                         </form>
                     </div>
                 )}
 
                 {list.length === 0 ? (
                     <EmptyState
-                        title="Belum ada properti"
-                        description="Tambahkan properti terlebih dahulu, lalu dapur dan sumber video."
+                        title="No properties yet"
+                        description="Add a property first, then kitchens and video sources."
                     />
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2">
@@ -228,7 +252,7 @@ export default function Locations({
                                     <div>
                                         <p className="font-medium">{p.name}</p>
                                         <p className="text-xs text-muted-foreground">
-                                            {p.address || 'Tanpa alamat'} ·{' '}
+                                            {p.address || 'No address'} ·{' '}
                                             {p.timezone}
                                         </p>
                                     </div>
@@ -236,12 +260,12 @@ export default function Locations({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            title="Hapus properti"
+                                            title="Delete property"
                                             onClick={() =>
                                                 remove(
                                                     properties.destroy(p.id)
                                                         .url,
-                                                    `properti ${p.name}`,
+                                                    `property ${p.name}`,
                                                 )
                                             }
                                         >
@@ -252,7 +276,7 @@ export default function Locations({
                                 <ul className="mt-3 space-y-2">
                                     {p.kitchens.length === 0 && (
                                         <li className="text-sm text-muted-foreground">
-                                            Belum ada dapur.
+                                            No kitchens yet.
                                         </li>
                                     )}
                                     {p.kitchens.map((k) => (
@@ -264,20 +288,20 @@ export default function Locations({
                                                 {k.name}
                                                 <span className="ml-2 text-xs text-muted-foreground">
                                                     {k.sources_count ?? 0}{' '}
-                                                    sumber
+                                                    sources
                                                 </span>
                                             </span>
                                             {canManage && (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    title="Hapus dapur"
+                                                    title="Delete kitchen"
                                                     onClick={() =>
                                                         remove(
                                                             kitchens.destroy(
                                                                 k.id,
                                                             ).url,
-                                                            `dapur ${k.name}`,
+                                                            `kitchen ${k.name}`,
                                                         )
                                                     }
                                                 >
@@ -297,5 +321,5 @@ export default function Locations({
 }
 
 Locations.layout = {
-    breadcrumbs: [{ title: 'Lokasi', href: locations.index() }],
+    breadcrumbs: [{ title: 'Locations', href: locations.index() }],
 };

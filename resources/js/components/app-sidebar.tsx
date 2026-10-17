@@ -53,14 +53,14 @@ export function AppSidebar() {
               { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
               { title: 'Monitor CCTV', href: monitor(), icon: MonitorPlay },
               {
-                  title: 'Uptime Perangkat',
+                  title: 'Device Uptime',
                   href: uptime.index(),
                   icon: RadioTower,
               },
-              { title: 'Video & Analisis', href: videos.index(), icon: Video },
-              { title: 'Anomali', href: events.index(), icon: ShieldAlert },
-              { title: 'Aktivitas', href: activities.index(), icon: Activity },
-              { title: 'Laporan', href: reports.index(), icon: FileText },
+              { title: 'Video & Analysis', href: videos.index(), icon: Video },
+              { title: 'Anomalies', href: events.index(), icon: ShieldAlert },
+              { title: 'Activities', href: activities.index(), icon: Activity },
+              { title: 'Reports', href: reports.index(), icon: FileText },
               {
                   title: 'Assistant',
                   href: assistant.index(),
@@ -69,8 +69,8 @@ export function AppSidebar() {
               {
                   title:
                       unreadNotifications > 0
-                          ? `Notifikasi (${unreadNotifications})`
-                          : 'Notifikasi',
+                          ? `Notifications (${unreadNotifications})`
+                          : 'Notifications',
                   href: notifications.index(),
                   icon: Bell,
               },
@@ -79,16 +79,16 @@ export function AppSidebar() {
 
     const settings: NavItem[] = tenant
         ? [
-              { title: 'Lokasi', href: locations.index(), icon: Building2 },
-              { title: 'Sumber Video', href: sources.index(), icon: Camera },
+              { title: 'Locations', href: locations.index(), icon: Building2 },
+              { title: 'Video Sources', href: sources.index(), icon: Camera },
               {
-                  title: 'Aturan SOP & Model',
+                  title: 'SOP Rules & Models',
                   href: rules.index(),
                   icon: SlidersHorizontal,
               },
-              { title: 'Anggota', href: members.index(), icon: Users },
+              { title: 'Members', href: members.index(), icon: Users },
               ...(can('manage_organization') || app.isPlatformAdmin
-                  ? [{ title: 'Sistem', href: system.index(), icon: ServerCog }]
+                  ? [{ title: 'System', href: system.index(), icon: ServerCog }]
                   : []),
           ]
         : [];
@@ -109,8 +109,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain label="Operasional" items={operations} />
-                <NavMain label="Pengaturan" items={settings} />
+                <NavMain label="Operations" items={operations} />
+                <NavMain label="Settings" items={settings} />
             </SidebarContent>
 
             <SidebarFooter>

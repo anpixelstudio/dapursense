@@ -14,7 +14,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 #[Signature('analysis:watchdog')]
-#[Description('Tandai run yang heartbeat-nya berhenti, retry terbatas, dan buat anomali sistem')]
+#[Description('Mark runs with stalled heartbeats, limited retries, and create system anomalies')]
 class AnalysisWatchdog extends Command
 {
     public function handle(): int
@@ -30,7 +30,7 @@ class AnalysisWatchdog extends Command
             $this->handleStalled($id, $threshold);
         }
 
-        $this->info("Run stalled diproses: {$stalled->count()}");
+        $this->info("Stalled runs processed: {$stalled->count()}");
 
         return self::SUCCESS;
     }
@@ -61,7 +61,7 @@ class AnalysisWatchdog extends Command
                     'status' => RunStatus::Failed,
                     'phase' => 'failed',
                     'error_code' => 'analysis_stalled',
-                    'error_message' => 'Worker berhenti mengirim heartbeat dan batas percobaan tercapai.',
+                    'error_message' => 'Worker stopped sending heartbeats and the retry limit was reached.',
                     'finished_at' => now(),
                     'worker_token_hash' => null,
                 ]);

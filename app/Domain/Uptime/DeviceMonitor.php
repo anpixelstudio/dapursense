@@ -25,7 +25,7 @@ class DeviceMonitor
         'database' => 'Database',
         'redis' => 'Antrean (Redis)',
         'worker' => 'Worker AI',
-        'storage' => 'Penyimpanan',
+        'storage' => 'Storage',
     ];
 
     public function __construct(private TcpProber $prober, private SystemStatus $system) {}

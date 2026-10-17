@@ -16,10 +16,10 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 #[Signature('system:upgrade
-    {--non-interactive : Jangan bertanya}
-    {--backup-verified : Konfirmasi backup terverifikasi (wajib di production)}
-    {--drain-timeout=120 : Detik menunggu run aktif selesai}')]
-#[Description('Upgrade ke release ini: cek checksum migration, jeda analisis, migration maju, seed, health check')]
+    {--non-interactive : Non-interactive mode}
+    {--backup-verified : Confirm backup verified (required in production)}
+    {--drain-timeout=120 : Seconds to wait for active runs to finish}')]
+#[Description('Upgrade to this release: migration checksum, pause analysis, migrate, seed, health check')]
 class SystemUpgrade extends SystemOperation
 {
     protected function operation(): string
@@ -33,7 +33,7 @@ class SystemUpgrade extends SystemOperation
         $installed = Schema::hasTable('system_releases') ? SystemRelease::query()->latest('installed_at')->first() : null;
 
         if (! $installed) {
-            throw new OperationFailed('not_installed', 'Aplikasi belum terinstal; jalankan php artisan system:install.');
+            throw new OperationFailed('not_installed', 'Application is not installed; run php artisan system:install.');
         }
 
         $this->report['from_version'] = $installed->app_version;
@@ -43,12 +43,12 @@ class SystemUpgrade extends SystemOperation
             $modified = app(SystemStatus::class)->modifiedMigrations($installed);
 
             if ($modified !== []) {
-                throw new OperationFailed('migration_modified', 'Migration yang sudah terpasang diubah; buat migration baru: '.implode(', ', $modified));
+                throw new OperationFailed('migration_modified', 'Installed migration(s) were modified; create a new migration: '.implode(', ', $modified));
             }
         });
 
         if (app()->isProduction() && ! $this->option('backup-verified')) {
-            throw new OperationFailed('backup_required', 'Production memerlukan --backup-verified setelah backup diuji.', self::EXIT_PREFLIGHT);
+            throw new OperationFailed('backup_required', 'Production requires --backup-verified after the backup has been tested.', self::EXIT_PREFLIGHT);
         }
 
         $before = app(SystemStatus::class)->pendingMigrations();
@@ -77,7 +77,7 @@ class SystemUpgrade extends SystemOperation
             if (time() >= $deadline) {
                 SystemSetting::put('analysis.paused', false);
 
-                throw new OperationFailed('workers_busy', 'Masih ada analisis berjalan; tunggu selesai atau batalkan lalu ulangi upgrade.');
+                throw new OperationFailed('workers_busy', 'Analysis is still running; wait for completion or cancel runs, then retry the upgrade.');
             }
 
             sleep(2);

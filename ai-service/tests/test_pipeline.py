@@ -108,6 +108,39 @@ def test_wholebody_runtime_runs_with_verified_artifact(make_job, settings):
     assert server.completed["manifest"]["detector"] == "yolox-wholebody12-n"
 
 
+KITCHEN_PPE = Path(__file__).resolve().parent.parent / "models" / "hairnet_gloves_yolov8.onnx"
+
+
+@pytest.mark.skipif(not (YOLOX.exists() and KITCHEN_PPE.exists()), reason="model kitchen PPE belum diunduh")
+def test_kitchen_ppe_runtime_emits_supported_ppe_states(make_job, settings):
+    import hashlib
+
+    job = make_job("onnx-kitchen-ppe")
+    job["input"]["model"].update(
+        name="yolox-kitchen-ppe",
+        artifact_key=KITCHEN_PPE.name,
+        sha256=hashlib.sha256(KITCHEN_PPE.read_bytes()).hexdigest(),
+        capabilities={
+            "ppe": {"hair_cover": True, "apron": False, "glove": True, "mask": False},
+            "companion_person": {
+                "artifact_key": YOLOX.name,
+                "sha256": hashlib.sha256(YOLOX.read_bytes()).hexdigest(),
+            },
+        },
+    )
+    server = FakeLaravel()
+
+    assert run_job(job, settings, transport=server.transport) == "succeeded"
+    assert server.completed["manifest"]["simulated"] is False
+    assert server.completed["manifest"]["detector"] == "yolox-kitchen-ppe"
+    # Synthetic testsrc video may not trigger hair/gloves, but states must not be "unsupported"
+    # for supported items when the detector ran (unknown/present/missing only).
+    assessments = [a for b in server.batches for a in b["ppe_assessments"]]
+    supported = [a for a in assessments if a["item_code"] in ("hair_cover", "glove")]
+    assert all(a["state"] in ("present", "missing", "unknown") for a in supported)
+    assert all(a.get("reason") != "unsupported" for a in supported)
+
+
 def test_onnx_model_with_wrong_checksum_is_refused(make_job, settings):
     job = yolox_job(make_job, "0" * 64)
     server = FakeLaravel()

@@ -21,8 +21,8 @@ class EventsNeedReview extends Notification
         return [
             'tenant_id' => $this->run->tenant_id,
             'kind' => 'events_need_review',
-            'title' => $this->openCount.' kejadian perlu ditinjau',
-            'body' => 'Analisis '.($this->run->isSimulation() ? 'SIMULASI ' : '').'selesai untuk video '.($this->run->video?->original_name ?? '-').'.',
+            'title' => $this->openCount.' event(s) need review',
+            'body' => ($this->run->isSimulation() ? 'SIMULATION ' : '').'analysis finished for video '.($this->run->video?->original_name ?? '-').'.',
             'url' => route('events.index', ['run_id' => $this->run->id], false),
             'is_simulation' => $this->run->isSimulation(),
         ];

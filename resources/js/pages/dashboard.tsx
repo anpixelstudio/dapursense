@@ -94,7 +94,7 @@ export default function Dashboard({
     const { tenant, can } = useTenant();
     const max = Math.max(1, ...trend.map((t) => t.violations + t.reviews));
     const ppeMeasured = (stats.ppe_coverage ?? 0) > 0;
-    const scope = `${stats.analysed_videos} video teranalisis, 7 hari`;
+    const scope = `${stats.analysed_videos} videos analysed, 7 days`;
 
     return (
         <>
@@ -103,7 +103,7 @@ export default function Dashboard({
                 <PageHeader
                     brand
                     title="Dashboard"
-                    description={`Ringkasan ${tenant?.name ?? 'dapur'} — fokus anomali, orang, dan area terlarang.`}
+                    description={`${tenant?.name ?? 'Kitchen'} overview — anomalies, people, and restricted areas.`}
                     actions={
                         <>
                             <Button variant="outline" asChild>
@@ -134,10 +134,10 @@ export default function Dashboard({
                         className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm ${storage.blocked ? 'border-destructive/40 bg-destructive/5 text-destructive' : 'border-amber-300 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100'}`}
                     >
                         <HardDrive className="size-4" />
-                        Penyimpanan terpakai {storage.used_percent.toFixed(1)}%.
+                        Storage used {storage.used_percent.toFixed(1)}%.
                         {storage.blocked
-                            ? ' Upload dan analisis baru diblokir sampai ruang dikosongkan.'
-                            : ' Segera kosongkan ruang penyimpanan.'}
+                            ? ' New uploads and analysis are blocked until space is freed.'
+                            : ' Free up storage soon.'}
                     </div>
                 )}
 
@@ -147,29 +147,29 @@ export default function Dashboard({
                 >
                     <Stat
                         emphasize
-                        label="Perlu ditinjau"
+                        label="Needs review"
                         value={stats.needs_review}
                         hint={
                             stats.needs_review_simulation > 0
-                                ? `+${stats.needs_review_simulation} dari simulasi`
-                                : 'Anomali nyata yang belum diputuskan'
+                                ? `+${stats.needs_review_simulation} from simulation`
+                                : 'Real anomalies not yet decided'
                         }
                     />
                     <Stat
                         emphasize={stats.restricted > 0}
-                        label="Area terlarang"
+                        label="Restricted area"
                         value={stats.restricted}
-                        hint="Kejadian nyata, 7 hari terakhir"
+                        hint="Real events, last 7 days"
                     />
                     <Stat
-                        label="Orang terdeteksi"
+                        label="People detected"
                         value={stats.people}
-                        hint={`Jejak orang · ${scope}`}
+                        hint={`Person tracks · ${scope}`}
                     />
                     <Stat
-                        label="Di zona kerja"
+                        label="In work zone"
                         value={formatMs(stats.work_zone_ms)}
-                        hint="Persiapan, kompor, cuci, kebersihan"
+                        hint="Prep, stove, sink, cleaning"
                     />
                 </div>
 
@@ -177,30 +177,30 @@ export default function Dashboard({
                     <section className="space-y-3">
                         <div className="flex items-center justify-between">
                             <h2 className="font-medium">
-                                Ringkasan per ruangan
+                                Summary by room
                             </h2>
                             <Link
                                 href={monitor()}
                                 className="text-sm text-muted-foreground hover:underline"
                             >
-                                Buka monitor
+                                Open monitor
                             </Link>
                         </div>
                         {rooms.length === 0 ? (
                             <EmptyState
-                                title="Belum ada ruangan"
-                                description="Tambahkan outlet dan dapur di menu Lokasi, lalu hubungkan kamera di Sumber Video."
+                                title="No rooms yet"
+                                description="Add outlets and kitchens under Locations, then connect cameras under Video Sources."
                             />
                         ) : (
                             <Table>
                                 <thead>
                                     <tr>
-                                        <Th>Ruangan</Th>
-                                        <Th>Kamera</Th>
-                                        <Th>Orang</Th>
-                                        <Th>Di zona kerja</Th>
-                                        <Th>Anomali terbuka</Th>
-                                        <Th>Analisis terakhir</Th>
+                                        <Th>Room</Th>
+                                        <Th>Cameras</Th>
+                                        <Th>People</Th>
+                                        <Th>In work zone</Th>
+                                        <Th>Open anomalies</Th>
+                                        <Th>Last analysis</Th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -263,7 +263,7 @@ export default function Dashboard({
                                                           room.last_analysis_at,
                                                           tenant?.timezone,
                                                       )
-                                                    : 'Belum dianalisis'}
+                                                    : 'Not analysed yet'}
                                             </Td>
                                         </tr>
                                     ))}
@@ -280,7 +280,7 @@ export default function Dashboard({
                                     href={system.index()}
                                     className="text-sm text-muted-foreground hover:underline"
                                 >
-                                    Detail
+                                    Details
                                 </Link>
                             )}
                         </div>
@@ -288,7 +288,7 @@ export default function Dashboard({
                             data="health"
                             fallback={
                                 <div className="rounded-xl border p-4 text-sm text-muted-foreground">
-                                    Memeriksa layanan...
+                                    Checking services...
                                 </div>
                             }
                         >
@@ -300,17 +300,17 @@ export default function Dashboard({
                 <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
                     <section className="rounded-xl border p-4">
                         <h2 className="mb-1 font-medium">
-                            Anomali nyata per hari
+                            Real anomalies per day
                         </h2>
                         <p className="mb-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                            <span>7 hari terakhir ({tenant?.timezone}).</span>
+                            <span>Last 7 days ({tenant?.timezone}).</span>
                             <span className="flex items-center gap-1">
                                 <span className="size-2 rounded-sm bg-red-500" />
                                 Pelanggaran
                             </span>
                             <span className="flex items-center gap-1">
                                 <span className="size-2 rounded-sm bg-blue-500" />
-                                Perlu ditinjau
+                                Needs review
                             </span>
                         </p>
                         <div className="flex h-40 items-end gap-2">
@@ -351,10 +351,10 @@ export default function Dashboard({
                     </section>
 
                     <section className="rounded-xl border p-4">
-                        <h2 className="mb-3 font-medium">Analisis aktif</h2>
+                        <h2 className="mb-3 font-medium">Active analyses</h2>
                         {activeRuns.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                Tidak ada analisis yang berjalan.
+                                No analyses running.
                             </p>
                         ) : (
                             <ul className="space-y-3">
@@ -399,7 +399,7 @@ export default function Dashboard({
                     <Info className="mt-0.5 size-3.5 shrink-0" />
                     {ppeMeasured ? (
                         <span>
-                            Kepatuhan APD 7 hari:{' '}
+                            7-day PPE compliance:{' '}
                             <strong className="text-foreground">
                                 {formatPercent(stats.ppe_compliance)}
                             </strong>{' '}
@@ -407,26 +407,26 @@ export default function Dashboard({
                         </span>
                     ) : (
                         <span>
-                            Fokus dashboard: orang, zona kerja, dan area
-                            terlarang. Penilaian APD aktif bila model mendukung.
+                            Dashboard focus: people, work zones, and restricted
+                            areas. PPE assessment when the model supports it.
                         </span>
                     )}
                 </p>
 
                 <section className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <h2 className="font-medium">Menunggu review</h2>
+                        <h2 className="font-medium">Awaiting review</h2>
                         <Link
                             href={events.index()}
                             className="text-sm text-muted-foreground hover:underline"
                         >
-                            Lihat semua
+                            View all
                         </Link>
                     </div>
                     {recentEvents.length === 0 ? (
                         <EmptyState
-                            title="Tidak ada anomali yang menunggu review"
-                            description="Kandidat pelanggaran baru dari analisis akan muncul di sini sampai diputuskan."
+                            title="No anomalies awaiting review"
+                            description="New violation candidates from analysis appear here until decided."
                         />
                     ) : (
                         <div className="divide-y rounded-xl border">
@@ -477,14 +477,14 @@ function HealthPanel({ health }: { health?: Health }) {
           : 'success';
     const rows: { label: string; ok: boolean; detail?: string }[] = [
         { label: 'Database', ok: health.database },
-        { label: 'Antrean (Redis)', ok: health.redis },
+        { label: 'Queue (Redis)', ok: health.redis },
         {
             label: 'Worker AI',
             ok: health.worker,
-            detail: `${health.running_runs} berjalan · ${health.queued_runs} antre`,
+            detail: `${health.running_runs} running · ${health.queued_runs} queued`,
         },
         {
-            label: 'Kamera aktif',
+            label: 'Active cameras',
             ok: health.active_sources > 0,
             detail: String(health.active_sources),
         },
@@ -505,7 +505,7 @@ function HealthPanel({ health }: { health?: Health }) {
                             </span>
                         )}
                         <Pill tone={row.ok ? 'success' : 'danger'}>
-                            {row.ok ? 'OK' : 'Bermasalah'}
+                            {row.ok ? 'OK' : 'Issue'}
                         </Pill>
                     </span>
                 </div>
@@ -515,7 +515,7 @@ function HealthPanel({ health }: { health?: Health }) {
                 className="flex items-center justify-between gap-2 px-4 py-2.5 hover:bg-muted/50"
                 data-test="health-devices"
             >
-                <span>Perangkat online</span>
+                <span>Devices online</span>
                 <span className="flex items-center gap-2">
                     {health.devices.total > 0 && (
                         <span className="text-xs text-muted-foreground">
@@ -523,7 +523,7 @@ function HealthPanel({ health }: { health?: Health }) {
                         </span>
                     )}
                     {health.devices.total === 0 ? (
-                        <Pill tone="neutral">Belum diatur</Pill>
+                        <Pill tone="neutral">Not configured</Pill>
                     ) : (
                         <Pill
                             tone={
@@ -539,12 +539,12 @@ function HealthPanel({ health }: { health?: Health }) {
             </Link>
             <div className="space-y-2 px-4 py-2.5">
                 <div className="flex items-center justify-between gap-2">
-                    <span>Penyimpanan</span>
+                    <span>Storage</span>
                     <Pill tone={storageTone}>
                         {health.storage_blocked
-                            ? 'Penuh'
+                            ? 'Full'
                             : health.storage_warning
-                              ? 'Hampir penuh'
+                              ? 'Almost full'
                               : 'OK'}
                     </Pill>
                 </div>
@@ -557,13 +557,13 @@ function HealthPanel({ health }: { health?: Health }) {
                     />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                    {health.storage_used_percent.toFixed(1)}% terpakai
+                    {health.storage_used_percent.toFixed(1)}% used
                 </p>
             </div>
             {!health.analysis_ready && (
                 <p className="px-4 py-2.5 text-xs text-destructive">
-                    Analisis baru belum bisa dijalankan. Periksa worker AI atau
-                    status jeda analisis.
+                    New analysis cannot run yet. Check the AI worker or
+                    analysis pause status.
                 </p>
             )}
         </div>

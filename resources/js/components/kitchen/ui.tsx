@@ -1,6 +1,21 @@
 import { Link, usePage } from '@inertiajs/react';
-import type { ComponentProps, ReactNode } from 'react';
+import {
+    Children,
+    isValidElement,
+    useMemo,
+    type ChangeEvent,
+    type ComponentProps,
+    type ReactElement,
+    type ReactNode,
+} from 'react';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     CATEGORY_LABELS,
     REVIEW_LABELS,
@@ -14,6 +29,63 @@ import type {
     RunStatus,
     VideoStatus,
 } from '@/types/kitchen';
+
+/** Radix Select disallows empty string values — map "" ↔ sentinel. */
+const EMPTY_VALUE = '__native_select_empty__';
+
+type SelectOption = {
+    value: string;
+    label: ReactNode;
+    disabled?: boolean;
+};
+
+function collectOptions(children: ReactNode): SelectOption[] {
+    const out: SelectOption[] = [];
+
+    Children.forEach(children, (child) => {
+        if (!isValidElement(child)) {
+            return;
+        }
+
+        const el = child as ReactElement<{
+            value?: string | number;
+            disabled?: boolean;
+            children?: ReactNode;
+        }>;
+
+        if (el.type === 'optgroup') {
+            out.push(...collectOptions(el.props.children));
+            return;
+        }
+
+        if (el.type !== 'option') {
+            return;
+        }
+
+        out.push({
+            value:
+                el.props.value === undefined || el.props.value === null
+                    ? ''
+                    : String(el.props.value),
+            label: el.props.children,
+            disabled: el.props.disabled,
+        });
+    });
+
+    return out;
+}
+
+function toSelectValue(
+    value: string | number | readonly string[] | undefined,
+): string | undefined {
+    if (value === undefined || value === null) {
+        return undefined;
+    }
+
+    const raw = String(Array.isArray(value) ? value[0] : value);
+
+    return raw === '' ? EMPTY_VALUE : raw;
+}
 
 export function PageHeader({
     title,
@@ -84,8 +156,8 @@ export function Pill({
 
 export function SimulationBadge() {
     return (
-        <Pill tone="purple" title="Hasil simulasi, bukan deteksi nyata">
-            SIMULASI
+        <Pill tone="purple" title="Simulation result, not real detection">
+            SIMULATION
         </Pill>
     );
 }
@@ -134,11 +206,11 @@ export function SeverityBadge({ severity }: { severity: string }) {
                 ? 'info'
                 : 'neutral';
     const label: Record<string, string> = {
-        high: 'Tinggi',
-        medium: 'Sedang',
-        low: 'Rendah',
-        review_needed: 'Perlu tinjau',
-        system: 'Sistem',
+        high: 'High',
+        medium: 'Medium',
+        low: 'Low',
+        review_needed: 'Needs review',
+        system: 'System',
     };
 
     return <Pill tone={t}>{label[severity] ?? severity}</Pill>;
@@ -155,18 +227,70 @@ export function CategoryBadge({ category }: { category: string }) {
     return <Pill tone={t}>{CATEGORY_LABELS[category] ?? category}</Pill>;
 }
 
+/**
+ * Drop-in replacement for native &lt;select&gt; that renders shadcn/Radix Select.
+ * Keep using &lt;option&gt; children — they are mapped to SelectItem automatically.
+ */
 export function NativeSelect({
     className,
-    ...props
+    id,
+    value,
+    defaultValue,
+    onChange,
+    disabled,
+    children,
+    name,
+    required,
 }: ComponentProps<'select'>) {
+    const options = useMemo(() => collectOptions(children), [children]);
+    const controlled = value !== undefined;
+    const selectValue = toSelectValue(value);
+    const selectDefault = toSelectValue(
+        defaultValue as string | number | undefined,
+    );
+
     return (
-        <select
-            className={cn(
-                'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50 dark:bg-input/30',
-                className,
-            )}
-            {...props}
-        />
+        <Select
+            value={controlled ? (selectValue ?? EMPTY_VALUE) : undefined}
+            defaultValue={!controlled ? selectDefault : undefined}
+            onValueChange={(next) => {
+                const real = next === EMPTY_VALUE ? '' : next;
+                onChange?.({
+                    target: {
+                        value: real,
+                        name: name ?? '',
+                        id: id ?? '',
+                    },
+                    currentTarget: {
+                        value: real,
+                        name: name ?? '',
+                        id: id ?? '',
+                    },
+                } as ChangeEvent<HTMLSelectElement>);
+            }}
+            disabled={disabled}
+            name={name}
+            required={required}
+        >
+            <SelectTrigger
+                id={id}
+                size="default"
+                className={cn('w-full min-w-0', className)}
+            >
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start" position="popper" className="max-h-72">
+                {options.map((opt, index) => (
+                    <SelectItem
+                        key={`${opt.value || 'empty'}-${index}`}
+                        value={opt.value === '' ? EMPTY_VALUE : opt.value}
+                        disabled={opt.disabled}
+                    >
+                        {opt.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     );
 }
 

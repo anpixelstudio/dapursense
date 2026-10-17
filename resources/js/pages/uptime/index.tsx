@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm, usePoll } from '@inertiajs/react';
 import { KeyRound, Pause, Play, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ConfirmDialog } from '@/components/kitchen/confirm-dialog';
 import {
     EmptyState,
     Field,
@@ -40,10 +41,10 @@ type DeviceToken = {
 };
 
 const KIND_LABELS: Record<string, string> = {
-    camera: 'Kamera CCTV',
+    camera: 'CCTV camera',
     nvr: 'NVR / DVR',
     edge: 'Edge box (heartbeat)',
-    network: 'Perangkat jaringan',
+    network: 'Network device',
     server: 'Server',
 };
 
@@ -58,17 +59,17 @@ function formatDuration(ms: number): string {
     const minutes = Math.floor(ms / 60000);
 
     if (minutes < 1) {
-        return '< 1 mnt';
+        return '< 1 min';
     }
 
     const h = Math.floor(minutes / 60);
     const d = Math.floor(h / 24);
 
     if (d > 0) {
-        return `${d} hr ${h % 24} jam`;
+        return `${d}d ${h % 24}h`;
     }
 
-    return h > 0 ? `${h} jam ${minutes % 60} mnt` : `${minutes} mnt`;
+    return h > 0 ? `${h}h ${minutes % 60}m` : `${minutes} min`;
 }
 
 function since(value: string | null): string {
@@ -89,7 +90,7 @@ const uptimeTone = (value: number | null) =>
 
 function StatusDot({ device }: { device: Device }) {
     if (device.paused) {
-        return <Pill tone="neutral">Dijeda</Pill>;
+        return <Pill tone="neutral">Paused</Pill>;
     }
 
     return device.status === 'up' ? (
@@ -97,7 +98,7 @@ function StatusDot({ device }: { device: Device }) {
     ) : device.status === 'down' ? (
         <Pill tone="danger">Offline</Pill>
     ) : (
-        <Pill tone="neutral">Belum dicek</Pill>
+        <Pill tone="neutral">Not checked yet</Pill>
     );
 }
 
@@ -108,12 +109,12 @@ function UptimeBars({ device }: { device: Device }) {
         <div
             className="flex h-6 items-end gap-px"
             data-test="uptime-bars"
-            aria-label={`Uptime 24 jam ${formatUptime(device.uptime_24h)}`}
+            aria-label={`Uptime last 24 hours ${formatUptime(device.uptime_24h)}`}
         >
             {device.bars.map((b) => (
                 <span
                     key={b.hour}
-                    title={`${formatDateTime(b.hour, tenant?.timezone)} · ${b.uptime === null ? 'tidak ada data' : formatUptime(b.uptime)}`}
+                    title={`${formatDateTime(b.hour, tenant?.timezone)} · ${b.uptime === null ? 'no data' : formatUptime(b.uptime)}`}
                     className={cn(
                         'h-full w-1.5 rounded-sm',
                         uptimeTone(b.uptime),
@@ -127,12 +128,12 @@ function UptimeBars({ device }: { device: Device }) {
 function target(device: Device): string {
     if (device.check_type === 'heartbeat') {
         return device.last_seen_at
-            ? `heartbeat ${since(device.last_seen_at)} lalu`
-            : 'menunggu heartbeat pertama';
+            ? `heartbeat ${since(device.last_seen_at)} ago`
+            : 'awaiting first heartbeat';
     }
 
     if (device.check_type === 'system') {
-        return 'komponen server';
+        return 'server component';
     }
 
     return `${device.host}:${device.port}`;
@@ -145,6 +146,9 @@ function DeviceTable({
     list: Device[];
     canManage: boolean;
 }) {
+    const [tokenDevice, setTokenDevice] = useState<Device | null>(null);
+    const [deleteDevice, setDeleteDevice] = useState<Device | null>(null);
+
     const togglePause = (d: Device) =>
         router.put(
             devices.update(d.id).url,
@@ -152,33 +156,53 @@ function DeviceTable({
             { preserveScroll: true },
         );
 
-    const rotate = (d: Device) => {
-        if (
-            confirm(
-                `Buat token baru untuk ${d.name}? Token lama langsung tidak berlaku.`,
-            )
-        ) {
-            router.post(devices.token(d.id).url, {}, { preserveScroll: true });
-        }
-    };
-
-    const remove = (d: Device) => {
-        if (confirm(`Hapus perangkat ${d.name} beserta riwayat uptime-nya?`)) {
-            router.delete(devices.destroy(d.id).url, { preserveScroll: true });
-        }
-    };
-
     return (
+        <>
+            <ConfirmDialog
+                open={tokenDevice !== null}
+                onOpenChange={(open) => !open && setTokenDevice(null)}
+                title={`Create a new token for ${tokenDevice?.name ?? 'device'}?`}
+                description="The old token stops working immediately. Copy the new token after it is shown."
+                confirmLabel="Rotate token"
+                destructive={false}
+                onConfirm={() => {
+                    if (!tokenDevice) {
+                        return;
+                    }
+                    router.post(
+                        devices.token(tokenDevice.id).url,
+                        {},
+                        { preserveScroll: true },
+                    );
+                    setTokenDevice(null);
+                }}
+            />
+            <ConfirmDialog
+                open={deleteDevice !== null}
+                onOpenChange={(open) => !open && setDeleteDevice(null)}
+                title={`Delete device ${deleteDevice?.name ?? ''}?`}
+                description="Uptime history for this device will also be removed."
+                confirmLabel="Delete device"
+                onConfirm={() => {
+                    if (!deleteDevice) {
+                        return;
+                    }
+                    router.delete(devices.destroy(deleteDevice.id).url, {
+                        preserveScroll: true,
+                    });
+                    setDeleteDevice(null);
+                }}
+            />
         <Table>
             <thead>
                 <tr>
-                    <Th>Perangkat</Th>
+                    <Th>Device</Th>
                     <Th>Status</Th>
-                    <Th>24 jam terakhir</Th>
-                    <Th className="text-right">24 jam</Th>
-                    <Th className="text-right">7 hari</Th>
-                    <Th className="text-right">30 hari</Th>
-                    <Th className="text-right">Latensi</Th>
+                    <Th>Last 24 hours</Th>
+                    <Th className="text-right">24h</Th>
+                    <Th className="text-right">7d</Th>
+                    <Th className="text-right">30d</Th>
+                    <Th className="text-right">Latency</Th>
                     <Th />
                 </tr>
             </thead>
@@ -214,9 +238,9 @@ function DeviceTable({
                                 {d.status === 'down'
                                     ? `${deviceErrorLabel(d.last_error)} · ${since(d.status_changed_at)}`
                                     : d.status === 'up'
-                                      ? `sejak ${since(d.status_changed_at)}`
+                                      ? `since ${since(d.status_changed_at)}`
                                       : d.consecutive_failures > 0
-                                        ? `gagal ${d.consecutive_failures}/${d.failure_threshold}`
+                                        ? `failed ${d.consecutive_failures}/${d.failure_threshold}`
                                         : ''}
                             </p>
                         </Td>
@@ -243,7 +267,7 @@ function DeviceTable({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        title={d.paused ? 'Lanjutkan' : 'Jeda'}
+                                        title={d.paused ? 'Resume' : 'Pause'}
                                         onClick={() => togglePause(d)}
                                     >
                                         {d.paused ? <Play /> : <Pause />}
@@ -252,8 +276,8 @@ function DeviceTable({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            title="Buat token baru"
-                                            onClick={() => rotate(d)}
+                                            title="Create new token"
+                                            onClick={() => setTokenDevice(d)}
                                         >
                                             <KeyRound />
                                         </Button>
@@ -262,8 +286,8 @@ function DeviceTable({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            title="Hapus"
-                                            onClick={() => remove(d)}
+                                            title="Delete"
+                                            onClick={() => setDeleteDevice(d)}
                                         >
                                             <Trash2 />
                                         </Button>
@@ -275,6 +299,7 @@ function DeviceTable({
                 ))}
             </tbody>
         </Table>
+        </>
     );
 }
 
@@ -302,16 +327,16 @@ done`;
                 variant="ghost"
                 size="icon"
                 className="absolute top-2 right-2"
-                title="Tutup"
+                title="Close"
                 onClick={onClose}
             >
                 <X />
             </Button>
-            <p className="font-medium">Token heartbeat untuk {token.device}</p>
+            <p className="font-medium">Heartbeat token for {token.device}</p>
             <p className="mt-1 text-muted-foreground">
-                Simpan sekarang; token hanya ditampilkan sekali. Jalankan skrip
-                ini di edge box (Linux) agar mengirim heartbeat setiap{' '}
-                {token.interval_seconds} detik.
+                Save it now; the token is shown only once. Run this script
+                on the edge box (Linux) to send a heartbeat every{' '}
+                {token.interval_seconds} seconds.
             </p>
             <code className="mt-3 block rounded-md bg-background p-2 break-all">
                 {token.token}
@@ -374,11 +399,11 @@ export default function Uptime({
 
     return (
         <>
-            <Head title="Uptime Perangkat" />
+            <Head title="Device Uptime" />
             <Page>
                 <PageHeader
-                    title="Uptime Perangkat"
-                    description="Kamera, NVR, edge box, perangkat jaringan dan komponen server dicek otomatis. Perangkat dianggap offline setelah gagal beberapa kali berturut-turut, lalu muncul sebagai anomali sistem dan notifikasi."
+                    title="Device Uptime"
+                    description="Cameras, NVRs, edge boxes, network devices, and server components are checked automatically. A device is offline after several consecutive failures, then appears as a system anomaly and notification."
                 />
                 <PageErrors keys={['device']} />
 
@@ -394,7 +419,7 @@ export default function Uptime({
                                 {summary.up}
                             </span>
                         }
-                        hint={`dari ${summary.total} perangkat`}
+                        hint={`of ${summary.total} devices`}
                     />
                     <Stat
                         label="Offline"
@@ -409,23 +434,23 @@ export default function Uptime({
                                 {summary.down}
                             </span>
                         }
-                        hint={summary.down > 0 ? 'perlu dicek' : 'semua normal'}
+                        hint={summary.down > 0 ? 'needs attention' : 'all normal'}
                     />
                     <Stat
-                        label="Uptime 24 jam"
+                        label="Uptime (24h)"
                         value={formatUptime(summary.uptime_24h)}
-                        hint="rata-rata semua pengecekan"
+                        hint="average across all checks"
                     />
                     <Stat
-                        label="Dijeda / belum dicek"
+                        label="Paused / not checked"
                         value={`${summary.paused} / ${summary.unknown}`}
-                        hint="cek berikutnya otomatis tiap menit"
+                        hint="next check runs automatically every minute"
                     />
                 </div>
 
                 {canManage && (
                     <form
-                        className="grid gap-3 rounded-xl border p-4 md:grid-cols-3 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr_90px_110px_auto] lg:items-end"
+                        className="space-y-4 rounded-xl border bg-card p-4 shadow-xs"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.post(devices.store().url, {
@@ -434,159 +459,172 @@ export default function Uptime({
                             });
                         }}
                     >
-                        <Field
-                            label="Nama perangkat"
-                            htmlFor="device-name"
-                            error={form.errors.name}
-                        >
-                            <Input
-                                id="device-name"
-                                placeholder="Kamera Dapur Utama"
-                                value={form.data.name}
-                                onChange={(e) =>
-                                    form.setData('name', e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Field
-                            label="Jenis"
-                            htmlFor="device-kind"
-                            error={form.errors.kind}
-                        >
-                            <NativeSelect
-                                id="device-kind"
-                                value={form.data.kind}
-                                onChange={(e) =>
-                                    form.setData((data) => ({
-                                        ...data,
-                                        kind: e.target.value,
-                                        port: DEFAULT_PORT[e.target.value],
-                                    }))
-                                }
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
+                            <Field
+                                label="Device name"
+                                htmlFor="device-name"
+                                error={form.errors.name}
                             >
-                                {['camera', 'nvr', 'edge', 'network'].map(
-                                    (k) => (
-                                        <option key={k} value={k}>
-                                            {KIND_LABELS[k]}
+                                <Input
+                                    id="device-name"
+                                    placeholder="Main Kitchen Camera"
+                                    value={form.data.name}
+                                    onChange={(e) =>
+                                        form.setData('name', e.target.value)
+                                    }
+                                />
+                            </Field>
+                            <Field
+                                label="Type"
+                                htmlFor="device-kind"
+                                error={form.errors.kind}
+                            >
+                                <NativeSelect
+                                    id="device-kind"
+                                    value={form.data.kind}
+                                    onChange={(e) =>
+                                        form.setData((data) => ({
+                                            ...data,
+                                            kind: e.target.value,
+                                            port: DEFAULT_PORT[e.target.value],
+                                        }))
+                                    }
+                                >
+                                    {['camera', 'nvr', 'edge', 'network'].map(
+                                        (k) => (
+                                            <option key={k} value={k}>
+                                                {KIND_LABELS[k]}
+                                            </option>
+                                        ),
+                                    )}
+                                </NativeSelect>
+                            </Field>
+                            <Field
+                                label="Kitchen"
+                                htmlFor="device-kitchen"
+                                error={form.errors.kitchen_id}
+                            >
+                                <NativeSelect
+                                    id="device-kitchen"
+                                    value={form.data.kitchen_id}
+                                    onChange={(e) =>
+                                        form.setData((data) => ({
+                                            ...data,
+                                            kitchen_id: e.target.value,
+                                            source_id: '',
+                                        }))
+                                    }
+                                >
+                                    <option value="">No kitchen</option>
+                                    {kitchens.map((k) => (
+                                        <option key={k.id} value={k.id}>
+                                            {k.property?.name} · {k.name}
                                         </option>
-                                    ),
-                                )}
-                            </NativeSelect>
-                        </Field>
-                        <Field
-                            label="Dapur"
-                            htmlFor="device-kitchen"
-                            error={form.errors.kitchen_id}
-                        >
-                            <NativeSelect
-                                id="device-kitchen"
-                                value={form.data.kitchen_id}
-                                onChange={(e) =>
-                                    form.setData((data) => ({
-                                        ...data,
-                                        kitchen_id: e.target.value,
-                                        source_id: '',
-                                    }))
+                                    ))}
+                                </NativeSelect>
+                            </Field>
+                            <Field
+                                label="Video source"
+                                htmlFor="device-source"
+                                error={form.errors.source_id}
+                                hint={
+                                    form.data.kind !== 'camera'
+                                        ? 'Only for CCTV cameras'
+                                        : undefined
                                 }
                             >
-                                <option value="">Tanpa dapur</option>
-                                {kitchens.map((k) => (
-                                    <option key={k.id} value={k.id}>
-                                        {k.property?.name} · {k.name}
-                                    </option>
-                                ))}
-                            </NativeSelect>
-                        </Field>
-                        <Field
-                            label="Sumber video"
-                            htmlFor="device-source"
-                            error={form.errors.source_id}
-                        >
-                            <NativeSelect
-                                id="device-source"
-                                value={form.data.source_id}
-                                disabled={form.data.kind !== 'camera'}
-                                onChange={(e) =>
-                                    form.setData('source_id', e.target.value)
-                                }
+                                <NativeSelect
+                                    id="device-source"
+                                    value={form.data.source_id}
+                                    disabled={form.data.kind !== 'camera'}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'source_id',
+                                            e.target.value,
+                                        )
+                                    }
+                                >
+                                    <option value="">Not linked</option>
+                                    {kitchenSources.map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </NativeSelect>
+                            </Field>
+                            <Field
+                                label="IP address / host"
+                                htmlFor="device-host"
+                                error={form.errors.host}
                             >
-                                <option value="">Tidak ditautkan</option>
-                                {kitchenSources.map((s) => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.name}
-                                    </option>
-                                ))}
-                            </NativeSelect>
-                        </Field>
-                        <Field
-                            label="Alamat IP / host"
-                            htmlFor="device-host"
-                            error={form.errors.host}
-                        >
-                            <Input
-                                id="device-host"
-                                placeholder={
-                                    isEdge
-                                        ? 'tidak perlu, pakai heartbeat'
-                                        : '192.168.1.64'
-                                }
-                                disabled={isEdge}
-                                value={form.data.host}
-                                onChange={(e) =>
-                                    form.setData('host', e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Field
-                            label="Port"
-                            htmlFor="device-port"
-                            error={form.errors.port}
-                        >
-                            <Input
-                                id="device-port"
-                                inputMode="numeric"
-                                disabled={isEdge}
-                                value={form.data.port}
-                                onChange={(e) =>
-                                    form.setData('port', e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Field
-                            label="Interval"
-                            htmlFor="device-interval"
-                            error={form.errors.interval_seconds}
-                        >
-                            <NativeSelect
-                                id="device-interval"
-                                value={form.data.interval_seconds}
-                                onChange={(e) =>
-                                    form.setData(
-                                        'interval_seconds',
-                                        e.target.value,
-                                    )
-                                }
+                                <Input
+                                    id="device-host"
+                                    placeholder={
+                                        isEdge
+                                            ? 'Not needed — use heartbeat'
+                                            : '192.168.1.64'
+                                    }
+                                    disabled={isEdge}
+                                    value={form.data.host}
+                                    onChange={(e) =>
+                                        form.setData('host', e.target.value)
+                                    }
+                                />
+                            </Field>
+                            <Field
+                                label="Port"
+                                htmlFor="device-port"
+                                error={form.errors.port}
                             >
-                                <option value="60">1 menit</option>
-                                <option value="300">5 menit</option>
-                                <option value="900">15 menit</option>
-                            </NativeSelect>
-                        </Field>
-                        <Button
-                            disabled={form.processing}
-                            data-test="add-device"
-                        >
-                            Tambah
-                        </Button>
+                                <Input
+                                    id="device-port"
+                                    inputMode="numeric"
+                                    disabled={isEdge}
+                                    value={form.data.port}
+                                    onChange={(e) =>
+                                        form.setData('port', e.target.value)
+                                    }
+                                />
+                            </Field>
+                            <Field
+                                label="Check interval"
+                                htmlFor="device-interval"
+                                error={form.errors.interval_seconds}
+                            >
+                                <NativeSelect
+                                    id="device-interval"
+                                    value={form.data.interval_seconds}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'interval_seconds',
+                                            e.target.value,
+                                        )
+                                    }
+                                >
+                                    <option value="60">1 minute</option>
+                                    <option value="300">5 minutes</option>
+                                    <option value="900">15 minutes</option>
+                                </NativeSelect>
+                            </Field>
+                        </div>
+                        <div className="flex justify-end border-t pt-4">
+                            <Button
+                                className="h-9 min-w-24"
+                                disabled={form.processing}
+                                data-test="add-device"
+                            >
+                                Add device
+                            </Button>
+                        </div>
                     </form>
                 )}
 
                 <section className="grid gap-3">
-                    <h2 className="text-base font-semibold">Perangkat</h2>
+                    <h2 className="text-base font-semibold">Devices</h2>
                     {physical.length === 0 ? (
                         <EmptyState
-                            title="Belum ada perangkat"
-                            description="Tambahkan kamera IP, NVR, router atau edge box untuk mulai memantau uptime."
+                            title="No devices yet"
+                            description="Add an IP camera, NVR, router, or edge box to start monitoring uptime."
                         />
                     ) : (
                         <DeviceTable list={physical} canManage={canManage} />
@@ -595,26 +633,26 @@ export default function Uptime({
 
                 <section className="grid gap-3">
                     <h2 className="text-base font-semibold">
-                        Server &amp; layanan
+                        Server &amp; services
                     </h2>
                     <DeviceTable list={server} canManage={canManage} />
                 </section>
 
                 <section className="grid gap-3">
                     <h2 className="text-base font-semibold">
-                        Riwayat gangguan
+                        Outage history
                     </h2>
                     {incidents.length === 0 ? (
-                        <EmptyState title="Belum ada gangguan tercatat" />
+                        <EmptyState title="No outages recorded yet" />
                     ) : (
                         <Table>
                             <thead>
                                 <tr>
-                                    <Th>Perangkat</Th>
-                                    <Th>Mulai</Th>
-                                    <Th>Selesai</Th>
-                                    <Th>Durasi</Th>
-                                    <Th>Penyebab</Th>
+                                    <Th>Device</Th>
+                                    <Th>Started</Th>
+                                    <Th>Ended</Th>
+                                    <Th>Duration</Th>
+                                    <Th>Reason</Th>
                                     <Th />
                                 </tr>
                             </thead>
@@ -638,7 +676,7 @@ export default function Uptime({
                                                 )
                                             ) : (
                                                 <Pill tone="danger">
-                                                    Masih offline
+                                                    Still offline
                                                 </Pill>
                                             )}
                                         </Td>
@@ -663,7 +701,7 @@ export default function Uptime({
                                                     )}
                                                     className="text-sm hover:underline"
                                                 >
-                                                    Lihat anomali
+                                                    View anomaly
                                                 </Link>
                                             )}
                                         </Td>
@@ -679,5 +717,5 @@ export default function Uptime({
 }
 
 Uptime.layout = {
-    breadcrumbs: [{ title: 'Uptime Perangkat', href: uptime.index() }],
+    breadcrumbs: [{ title: 'Device Uptime', href: uptime.index() }],
 };

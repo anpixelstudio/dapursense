@@ -181,25 +181,24 @@ export default function Monitor({
             <Page>
                 <PageHeader
                     title="Monitor CCTV"
-                    description="Pantau semua kamera per ruangan. Pilih ruangan di kiri, lalu klik kamera untuk memeriksanya satu per satu (panah kiri/kanan untuk pindah kamera)."
+                    description="Monitor all cameras by room. Select a room on the left, then click cameras to inspect one at a time (left/right arrows to switch cameras)."
                 />
                 <p
                     className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100"
                     data-test="monitor-replay-note"
                 >
-                    Mode replay: setiap kamera memutar rekaman terakhirnya
-                    secara berulang dengan jam berjalan, jadi tampil seperti
-                    siaran langsung. Kotak hijau adalah deteksi AI dari analisis
-                    terakhir. Siaran langsung RTSP tersedia di tahap P1.
+                    Replay mode: each camera loops its latest recording
+                    with a running clock so it looks like live video. Green boxes are AI detections from the latest
+                    analysis. Live RTSP is planned for P1.
                 </p>
 
                 {feeds.length === 0 ? (
                     <EmptyState
-                        title="Belum ada kamera aktif"
-                        description="Tambahkan sumber video di menu Sumber Video, lalu unggah rekaman."
+                        title="No active cameras yet"
+                        description="Add video sources under Video Sources, then upload recordings."
                         action={
                             <Button asChild size="sm">
-                                <Link href={sources.index()}>Sumber Video</Link>
+                                <Link href={sources.index()}>Video Sources</Link>
                             </Button>
                         }
                     />
@@ -223,11 +222,11 @@ export default function Monitor({
                                 )}
                             >
                                 <span className="flex items-center gap-2">
-                                    <LayoutGrid className="size-4" /> Semua
-                                    ruangan
+                                    <LayoutGrid className="size-4" /> All
+                                    rooms
                                 </span>
                                 <span className="text-xs opacity-80">
-                                    {feeds.length} kamera
+                                    {feeds.length} cameras
                                 </span>
                             </button>
                             {properties.map((property) => (
@@ -319,8 +318,8 @@ export default function Monitor({
                                 />
                             ) : visible.length === 0 ? (
                                 <EmptyState
-                                    title="Ruangan ini belum punya kamera"
-                                    description="Tambahkan sumber video untuk dapur ini di menu Sumber Video."
+                                    title="This room has no cameras yet"
+                                    description="Add a video source for this kitchen under Video Sources."
                                 />
                             ) : (
                                 <div className="space-y-6">
@@ -494,7 +493,7 @@ function CctvFeed({
                                 TIDAK ADA SINYAL
                             </span>
                             <span className="text-xs">
-                                Belum ada rekaman siap untuk kamera ini
+                                No ready recording for this camera yet
                             </span>
                         </div>
                     )}
@@ -520,7 +519,7 @@ function CctvFeed({
             {large && feed.video && (
                 <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                     <span className="font-mono">
-                        Posisi rekaman {formatMs(timeMs)} /{' '}
+                        Recording position {formatMs(timeMs)} /{' '}
                         {formatMs(feed.video.duration_ms)}
                     </span>
                     <label className="flex items-center gap-1">
@@ -529,7 +528,7 @@ function CctvFeed({
                             checked={showZones}
                             onChange={(e) => setShowZones(e.target.checked)}
                         />{' '}
-                        Zona
+                        Zones
                     </label>
                     <label className="flex items-center gap-1">
                         <input
@@ -537,7 +536,7 @@ function CctvFeed({
                             checked={showBoxes}
                             onChange={(e) => setShowBoxes(e.target.checked)}
                         />{' '}
-                        Deteksi AI
+                        AI detections
                     </label>
                 </div>
             )}
@@ -562,25 +561,25 @@ function FocusView({
         <div className="space-y-4" data-test="cctv-focus">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <Button variant="ghost" size="sm" onClick={onBack}>
-                    <LayoutGrid className="size-4" /> Kembali ke grid
+                    <LayoutGrid className="size-4" /> Back to grid
                 </Button>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onStep(-1)}
-                        aria-label="Kamera sebelumnya"
+                        aria-label="Previous camera"
                     >
                         <ChevronLeft className="size-4" />
                     </Button>
                     <span className="text-sm text-muted-foreground tabular-nums">
-                        Kamera {position}
+                        Camera {position}
                     </span>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onStep(1)}
-                        aria-label="Kamera berikutnya"
+                        aria-label="Next camera"
                     >
                         <ChevronRight className="size-4" />
                     </Button>
@@ -599,11 +598,11 @@ function FocusView({
                         {feed.video ? (
                             <>
                                 <p className="pt-2 text-xs text-muted-foreground">
-                                    Rekaman: {feed.video.original_name} (
+                                    Recording: {feed.video.original_name} (
                                     {formatMs(feed.video.duration_ms)})
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Direkam{' '}
+                                    Recorded{' '}
                                     {formatDateTime(
                                         feed.video.recorded_at ??
                                             feed.video.created_at,
@@ -613,13 +612,13 @@ function FocusView({
                             </>
                         ) : (
                             <p className="pt-2 text-xs text-muted-foreground">
-                                Belum ada rekaman. Unggah video dari menu Video
-                                & Analisis.
+                                No recording yet. Upload video from Video
+                                & Analysis.
                             </p>
                         )}
                         {feed.run ? (
                             <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                                Deteksi: {feed.run.model?.name}{' '}
+                                Detections: {feed.run.model?.name}{' '}
                                 {feed.run.model?.version}
                                 {feed.run.mode === 'simulation' && (
                                     <SimulationBadge />
@@ -628,7 +627,7 @@ function FocusView({
                         ) : (
                             feed.video && (
                                 <p className="text-xs text-muted-foreground">
-                                    Rekaman ini belum dianalisis.
+                                    This recording has not been analysed yet.
                                 </p>
                             )
                         )}
@@ -636,24 +635,24 @@ function FocusView({
                             {feed.video && (
                                 <Button asChild size="sm" variant="outline">
                                     <Link href={videos.show(feed.video.id)}>
-                                        Buka video & zona
+                                        Open video & zones
                                     </Link>
                                 </Button>
                             )}
                             {feed.run && (
                                 <Button asChild size="sm" variant="outline">
                                     <Link href={analyses.show(feed.run.id)}>
-                                        Hasil analisis
+                                        Analysis results
                                     </Link>
                                 </Button>
                             )}
                         </div>
                     </div>
                     <div className="space-y-2 rounded-xl border p-4">
-                        <p className="font-medium">Anomali terbaru</p>
+                        <p className="font-medium">Recent anomalies</p>
                         {feed.recent_events.length === 0 ? (
                             <p className="text-xs text-muted-foreground">
-                                Belum ada anomali dari kamera ini.
+                                No anomalies from this camera yet.
                             </p>
                         ) : (
                             <ul className="space-y-2">
@@ -666,10 +665,10 @@ function FocusView({
                                             <span>
                                                 {eventTypeLabel(event.type)}
                                                 <span className="block text-xs text-muted-foreground">
-                                                    detik{' '}
+                                                    at{' '}
                                                     {formatMs(event.first_ms)}
                                                     {event.is_simulation &&
-                                                        ' · simulasi'}
+                                                        ' · simulation'}
                                                 </span>
                                             </span>
                                             <ReviewBadge

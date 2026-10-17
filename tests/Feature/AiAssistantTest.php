@@ -127,7 +127,7 @@ test('owners can open the assistant page and call stub endpoints', function () {
         ->json('text');
 
     expect($todayReply)
-        ->toContain('Laporan')
+        ->toContain('Reports')
         ->toContain('/reports');
 
     $monthReply = $this->actingAs($this->owner)
@@ -138,7 +138,7 @@ test('owners can open the assistant page and call stub endpoints', function () {
         ->assertOk()
         ->json('text');
 
-    expect($monthReply)->toContain('bulan ini');
+    expect($monthReply)->toContain('this month');
 
     $peopleReply = $this->actingAs($this->owner)
         ->postJson('/assistant/chat', [
@@ -149,6 +149,6 @@ test('owners can open the assistant page and call stub endpoints', function () {
         ->json('text');
 
     expect($peopleReply)
-        ->toContain('Tim DapurSense')
+        ->toContain('DapurSense team')
         ->toContain('/members');
 });

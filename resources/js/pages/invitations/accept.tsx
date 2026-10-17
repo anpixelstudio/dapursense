@@ -19,21 +19,21 @@ export default function AcceptInvitation({ token, invitation }: Props) {
 
     return (
         <>
-            <Head title="Undangan organisasi" />
+            <Head title="Organization invitation" />
             <Page>
                 {!invitation || !invitation.usable ? (
                     <EmptyState
-                        title="Undangan tidak berlaku"
-                        description="Tautan undangan sudah dipakai, dicabut, atau kedaluwarsa. Minta Owner mengirim undangan baru."
+                        title="Invitation invalid"
+                        description="This invitation link was used, revoked, or expired. Ask an Owner to send a new invitation."
                     />
                 ) : (
                     <div className="mx-auto w-full max-w-md space-y-4 rounded-xl border p-6">
                         <h1 className="text-lg font-semibold">
-                            Bergabung dengan {invitation.organization}
+                            Join {invitation.organization}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Anda diundang sebagai{' '}
-                            <strong>{invitation.role}</strong> untuk email{' '}
+                            You were invited as{' '}
+                            <strong>{invitation.role}</strong> for email{' '}
                             {invitation.email}.
                         </p>
                         {invitation.email_matches ? (
@@ -45,12 +45,12 @@ export default function AcceptInvitation({ token, invitation }: Props) {
                                 }
                                 data-test="accept-invitation"
                             >
-                                Terima undangan
+                                Accept invitation
                             </Button>
                         ) : (
                             <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
-                                Undangan ini untuk email lain. Keluar lalu masuk
-                                atau daftar memakai {invitation.email}.
+                                This invitation is for a different email. Log out and sign in
+                                or register with {invitation.email}.
                             </p>
                         )}
                     </div>

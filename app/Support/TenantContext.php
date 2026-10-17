@@ -46,7 +46,7 @@ class TenantContext
 
     public function requireId(): string
     {
-        return $this->tenantId ?? throw new HttpException(403, 'Organisasi aktif belum dipilih.');
+        return $this->tenantId ?? throw new HttpException(403, 'No active organization selected.');
     }
 
     public function tenant(): ?Tenant

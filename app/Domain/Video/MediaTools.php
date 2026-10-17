@@ -23,20 +23,20 @@ class MediaTools
         $process->run();
 
         if (! $process->isSuccessful()) {
-            throw new VideoRejected('corrupt_file', 'File tidak dapat dibaca sebagai video. Pastikan file tidak rusak.');
+            throw new VideoRejected('corrupt_file', 'File could not be read as video. Ensure the file is not corrupt.');
         }
 
         $data = json_decode($process->getOutput(), true) ?: [];
         $video = collect($data['streams'] ?? [])->firstWhere('codec_type', 'video');
 
         if (! $video || ($video['disposition']['attached_pic'] ?? 0) === 1) {
-            throw new VideoRejected('no_video_stream', 'File tidak memiliki stream video.');
+            throw new VideoRejected('no_video_stream', 'File has no video stream.');
         }
 
         $duration = (float) ($video['duration'] ?? $data['format']['duration'] ?? 0);
 
         if ($duration <= 0) {
-            throw new VideoRejected('unknown_duration', 'Durasi video tidak dapat ditentukan; file mungkin rusak.');
+            throw new VideoRejected('unknown_duration', 'Video duration could not be determined; the file may be corrupt.');
         }
 
         $rotation = (int) ($video['tags']['rotate'] ?? 0);
@@ -99,7 +99,7 @@ class MediaTools
         $process->run();
 
         if (! $process->isSuccessful()) {
-            throw new VideoRejected('transcode_failed', 'Video tidak dapat diproses oleh FFmpeg: '.str($process->getErrorOutput())->limit(300));
+            throw new VideoRejected('transcode_failed', 'Video could not be processed by FFmpeg: '.str($process->getErrorOutput())->limit(300));
         }
     }
 
