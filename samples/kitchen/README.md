@@ -1,51 +1,45 @@
-# Kitchen dummy samples (DapurSense)
+# Kitchen sample videos (DapurSense)
 
-Gratis, khusus suasana dapur / chef / restaurant kitchen — untuk upload uji di **Video & Analisis**.
+Free stock clips of restaurant / industrial kitchens — for upload tests in **Videos & Analysis**.
 
-## Sudah di-download (10 file, ~44 MB)
+MP4 files in this folder are **gitignored** (large). Download locally for demos.
+
+## Recommended local set (10 files, ~44 MB)
 
 | File | Scene |
 |------|--------|
-| `chef-restaurant-kitchen.mp4` | Chef memasak di dapur resto |
-| `chefs-work-restaurant-kitchen.mp4` | Beberapa chef di dapur industri |
-| `chef-salad-restaurant-kitchen.mp4` | Prep salad di dapur resto |
-| `chef-stir-fry-kitchen.mp4` | Stir-fry api tinggi |
-| `chef-large-grill.mp4` | Chef di grill besar |
-| `chef-plating-finish.mp4` | Finishing plating |
-| `chef-shaping-pizza.mp4` | Bentuk adonan pizza |
-| `chef-chopping-garlic.mp4` | Potong bawang (close-up tangan) |
-| `chef-dough-flour.mp4` | Adonan + tepung |
-| `chef-pizza-dough-spin.mp4` | Putar adonan pizza |
+| `chef-restaurant-kitchen.mp4` | Chef cooking in a restaurant kitchen |
+| `chefs-work-restaurant-kitchen.mp4` | Several chefs in an industrial kitchen |
+| `chef-salad-restaurant-kitchen.mp4` | Salad prep |
+| `chef-stir-fry-kitchen.mp4` | High-heat stir-fry |
+| `chef-large-grill.mp4` | Chef at a large grill |
+| `chef-plating-finish.mp4` | Plating finish |
+| `chef-shaping-pizza.mp4` | Shaping pizza dough |
+| `chef-chopping-garlic.mp4` | Chopping (hand close-up) |
+| `chef-dough-flour.mp4` | Dough and flour |
+| `chef-pizza-dough-spin.mp4` | Spinning pizza dough |
 
-Sumber: [Mixkit](https://mixkit.co/) (free stock). Cek lisensi Mixkit sebelum pakai di materi publik.
+Source: [Mixkit](https://mixkit.co/) free stock. Check Mixkit’s license before public marketing use.
 
-## Mau lebih banyak (ribuan)
+Re-download example (CDN; Mixkit pages may return 403):
 
-Cari & download manual (gratis):
+```bash
+# from kitchen-intelligence/
+# use the download script or Mixkit CDN URLs already used in prior setup
+```
 
-1. **Pexels — Restaurant Kitchen** (~3.900+)  
-   https://www.pexels.com/search/videos/restaurant%20kitchen/
+## More free sources
 
-2. **Pixabay — Restaurant Kitchen** (~980+)  
-   https://pixabay.com/videos/search/restaurant%20kitchen/
+1. **Pexels — Restaurant Kitchen** — https://www.pexels.com/search/videos/restaurant%20kitchen/
+2. **Pixabay — Restaurant Kitchen** — https://pixabay.com/videos/search/restaurant%20kitchen/
+3. **Pixabay — Kitchen Staff** — https://pixabay.com/videos/search/kitchen%20staff/
+4. **Mixkit — Chef** — https://mixkit.co/free-stock-video/chef/
+5. **Mixkit — Kitchen** — https://mixkit.co/free-stock-video/kitchen/
+6. **Mixkit — Cooking** — https://mixkit.co/free-stock-video/cooking/
 
-3. **Pixabay — Kitchen Staff** (~630+)  
-   https://pixabay.com/videos/search/kitchen%20staff/
+## Tips for DapurSense demos
 
-4. **Mixkit — Chef** (~260+)  
-   https://mixkit.co/free-stock-video/chef/
-
-5. **Mixkit — Kitchen** (~860+)  
-   https://mixkit.co/free-stock-video/kitchen/
-
-6. **Mixkit — Cooking** (~880+)  
-   https://mixkit.co/free-stock-video/cooking/
-
-7. **Vecteezy — Restaurant Kitchen** (~790+, sebagian gratis)  
-   https://www.vecteezy.com/free-videos/restaurant-kitchen
-
-## Tip untuk DapurSense
-
-- Pilih clip **medium / wide** (seluruh dapur + orang), bukan hanya close-up tangan.
-- Durasi ideal uji: 10–60 detik, horizontal HD.
-- Upload via UI **Video & Analisis**, atau simpan di sini lalu import.
+- Prefer **medium / wide** shots (full kitchen + people), not hand-only close-ups.
+- Ideal clip length: 10–60 seconds, horizontal HD.
+- Upload via **Videos & Analysis**, or keep files here for local import.
+- For PPE demos, use **`yolox-kitchen-ppe`** (hair cover + gloves) or **simulation** mode.
