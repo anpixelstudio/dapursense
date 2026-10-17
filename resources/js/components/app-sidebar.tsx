@@ -11,6 +11,7 @@ import {
     ServerCog,
     ShieldAlert,
     SlidersHorizontal,
+    Sparkles,
     Users,
     Video,
 } from 'lucide-react';
@@ -30,6 +31,7 @@ import {
 import { useTenant } from '@/lib/kitchen';
 import { dashboard, monitor } from '@/routes';
 import activities from '@/routes/activities';
+import assistant from '@/routes/assistant';
 import events from '@/routes/events';
 import locations from '@/routes/locations';
 import members from '@/routes/members';
@@ -59,6 +61,11 @@ export function AppSidebar() {
               { title: 'Anomali', href: events.index(), icon: ShieldAlert },
               { title: 'Aktivitas', href: activities.index(), icon: Activity },
               { title: 'Laporan', href: reports.index(), icon: FileText },
+              {
+                  title: 'Assistant',
+                  href: assistant.index(),
+                  icon: Sparkles,
+              },
               {
                   title:
                       unreadNotifications > 0

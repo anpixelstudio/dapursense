@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Lock, LockOpen } from 'lucide-react';
+import { Lock, LockOpen, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import {
     CategoryBadge,
     Field,
@@ -12,6 +13,9 @@ import {
     Textarea,
 } from '@/components/kitchen/ui';
 import { Button } from '@/components/ui/button';
+import { AssistantMarkdown } from '@/components/assistant-markdown';
+import { loadAssistantLocale } from '@/lib/assistant-i18n';
+import { postAssistant } from '@/lib/assistant';
 import {
     DISMISS_LABELS,
     deviceErrorLabel,
@@ -28,6 +32,7 @@ import {
     useTenant,
 } from '@/lib/kitchen';
 import analyses from '@/routes/analyses';
+import assistant from '@/routes/assistant';
 import events from '@/routes/events';
 import uptime from '@/routes/uptime';
 import type {
@@ -60,6 +65,9 @@ export default function EventShow({
 }: Props) {
     const { can, tenant } = useTenant();
     const isDevice = event.type === 'device_offline';
+    const [summary, setSummary] = useState<string | null>(null);
+    const [summaryBusy, setSummaryBusy] = useState(false);
+    const [summaryError, setSummaryError] = useState<string | null>(null);
     const form = useForm({
         to_status: allowedTransitions[0]?.value ?? '',
         expected_revision: event.revision,
@@ -67,6 +75,22 @@ export default function EventShow({
         reason: '',
         action_note: '',
     });
+
+    const summarize = async () => {
+        setSummaryError(null);
+        setSummaryBusy(true);
+        try {
+            const data = await postAssistant<{ text: string }>(
+                assistant.summarize(event.id).url,
+                { locale: loadAssistantLocale() },
+            );
+            setSummary(data.text);
+        } catch (e) {
+            setSummaryError(e instanceof Error ? e.message : 'Gagal merangkum');
+        } finally {
+            setSummaryBusy(false);
+        }
+    };
 
     const canReview = allowedTransitions.some((t) =>
         t.value === 'OPEN' ? can('reopen_events') : can('review_events'),
@@ -97,6 +121,7 @@ export default function EventShow({
             <Head title={eventTypeLabel(event.type)} />
             <Page>
                 <PageHeader
+                    brand
                     title={eventTypeLabel(event.type)}
                     description={
                         isDevice
@@ -364,6 +389,46 @@ export default function EventShow({
                     </div>
 
                     <div className="space-y-4">
+                        <div
+                            className="space-y-3 rounded-xl border p-4"
+                            data-test="ai-summary"
+                        >
+                            <div className="space-y-1">
+                                <p className="flex items-center gap-2 text-sm font-medium">
+                                    <Sparkles className="size-4 text-primary" />
+                                    Summarize with AI
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Short owner-ready narrative from this event
+                                    — locked summarizer prompt.
+                                </p>
+                            </div>
+                            <Button
+                                type="button"
+                                className="w-full"
+                                disabled={summaryBusy}
+                                onClick={() => void summarize()}
+                                data-test="ai-summarize"
+                            >
+                                <Sparkles className="size-4" />
+                                {summaryBusy ? 'Thinking…' : 'Summarize with AI'}
+                            </Button>
+                            {summaryError && (
+                                <p className="text-sm text-destructive">
+                                    {summaryError}
+                                </p>
+                            )}
+                            {summary ? (
+                                <div className="rounded-lg border bg-card p-3 shadow-xs">
+                                    <AssistantMarkdown content={summary} />
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Summary appears here after you run it.
+                                </p>
+                            )}
+                        </div>
+
                         {canReview && allowedTransitions.length > 0 && (
                             <form
                                 onSubmit={submit}

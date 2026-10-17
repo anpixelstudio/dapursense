@@ -19,14 +19,26 @@ export function PageHeader({
     title,
     description,
     actions,
+    brand = false,
 }: {
     title: string;
     description?: ReactNode;
     actions?: ReactNode;
+    /** Show product name eyebrow (Anpixel DapurSense). */
+    brand?: boolean | string;
 }) {
+    const { name } = usePage().props;
+    const brandLabel =
+        typeof brand === 'string' ? brand : brand ? String(name) : null;
+
     return (
         <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-1">
+                {brandLabel && (
+                    <p className="text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
+                        {brandLabel}
+                    </p>
+                )}
                 <h1 className="text-xl font-semibold tracking-tight">
                     {title}
                 </h1>
@@ -196,15 +208,24 @@ export function Stat({
     label,
     value,
     hint,
+    emphasize = false,
 }: {
     label: string;
     value: ReactNode;
     hint?: ReactNode;
+    emphasize?: boolean;
 }) {
     return (
-        <div className="rounded-xl border bg-card p-4">
+        <div
+            className={cn(
+                'rounded-xl border bg-card p-4',
+                emphasize && 'border-primary/25 bg-primary/[0.04]',
+            )}
+        >
             <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+                {value}
+            </p>
             {hint && (
                 <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
             )}

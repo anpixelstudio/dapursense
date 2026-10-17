@@ -60,6 +60,20 @@ return [
             'report' => false,
         ],
 
+        // GCS via S3-compatible HMAC keys (Cloud Storage interoperability).
+        // Create HMAC key in GCP → set AWS_* below → FILESYSTEM_DISK=gcs
+        'gcs' => [
+            'driver' => 's3',
+            'key' => env('GCS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('GCS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('GCS_REGION', 'auto'),
+            'bucket' => env('GCS_BUCKET', env('AWS_BUCKET')),
+            'endpoint' => env('GCS_ENDPOINT', 'https://storage.googleapis.com'),
+            'use_path_style_endpoint' => env('GCS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
@@ -31,6 +32,15 @@ Route::middleware(['auth', 'verified.optional', 'tenant:optional'])->group(funct
 Route::middleware(['auth', 'verified.optional', 'tenant'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('monitor', MonitorController::class)->name('monitor');
+
+    Route::get('assistant', [AiAssistantController::class, 'index'])->name('assistant.index');
+    Route::post('assistant/events/{event}/summarize', [AiAssistantController::class, 'summarizeEvent'])
+        ->middleware('throttle:20,1')->name('assistant.summarize');
+    Route::post('assistant/chat', [AiAssistantController::class, 'chat'])
+        ->middleware('throttle:30,1')->name('assistant.chat');
+    Route::post('assistant/daily-report', [AiAssistantController::class, 'dailyReport'])
+        ->middleware('throttle:10,1')->name('assistant.daily-report');
+
     Route::post('tenants/switch', [OrganizationController::class, 'switch'])->name('tenants.switch');
 
     Route::get('locations', [LocationController::class, 'index'])->name('locations.index');

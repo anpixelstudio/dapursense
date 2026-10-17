@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Domain\Ai\AiAssistant;
+use App\Domain\Ai\GeminiAiAssistant;
+use App\Domain\Ai\StubAiAssistant;
 use App\Domain\System\ReleaseManifest;
 use App\Enums\Permission;
 use App\Models\User;
@@ -25,6 +28,20 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(TenantContext::class);
         $this->app->singleton(ReleaseManifest::class);
+
+        $this->app->singleton(AiAssistant::class, function () {
+            $config = config('kitchen.genai');
+
+            if (($config['provider'] ?? 'stub') === 'gemini') {
+                return new GeminiAiAssistant(
+                    (string) ($config['api_key'] ?? ''),
+                    (string) ($config['model'] ?? 'gemini-2.5-flash'),
+                    (string) ($config['endpoint'] ?? 'https://generativelanguage.googleapis.com/v1beta'),
+                );
+            }
+
+            return new StubAiAssistant;
+        });
     }
 
     /**

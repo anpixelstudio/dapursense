@@ -12,6 +12,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,6 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        // Cloud Run / load balancers terminate TLS and forward X-Forwarded-*.
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_AWS_ELB,
+        );
 
         $middleware->web(append: [
             HandleAppearance::class,
@@ -39,6 +50,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Tenant context must exist before route model binding so bound models are tenant-scoped.
         $middleware->prependToPriorityList(SubstituteBindings::class, ResolveTenantContext::class);
+    })
+    ->booted(function () {
+        if (filter_var(env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOL)
+            || filter_var(env('CLOUD_RUN', false), FILTER_VALIDATE_BOOL)) {
+            URL::forceScheme('https');
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

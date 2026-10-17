@@ -10,7 +10,8 @@ export type UseAppearanceReturn = {
 };
 
 const listeners = new Set<() => void>();
-let currentAppearance: Appearance = 'system';
+/** Anpixel brand default: light orange UI (not OS dark). */
+let currentAppearance: Appearance = 'light';
 
 const prefersDark = (): boolean => {
     if (typeof window === 'undefined') {
@@ -31,10 +32,17 @@ const setCookie = (name: string, value: string, days = 365): void => {
 
 const getStoredAppearance = (): Appearance => {
     if (typeof window === 'undefined') {
-        return 'system';
+        return 'light';
     }
 
-    return (localStorage.getItem('appearance') as Appearance) || 'system';
+    const stored = localStorage.getItem('appearance') as Appearance | null;
+
+    // Prefer light brand; treat legacy "system" as light.
+    if (!stored || stored === 'system') {
+        return 'light';
+    }
+
+    return stored;
 };
 
 const isDarkMode = (appearance: Appearance): boolean => {
@@ -75,15 +83,24 @@ export function initializeTheme(): void {
         return;
     }
 
-    if (!localStorage.getItem('appearance')) {
-        localStorage.setItem('appearance', 'system');
-        setCookie('appearance', 'system');
+    const stored = localStorage.getItem('appearance') as Appearance | null;
+
+    // Brand default: light orange. Migrate unset/system → light (OS dark no longer auto-applies).
+    if (!stored || stored === 'system') {
+        localStorage.setItem('appearance', 'light');
+        setCookie('appearance', 'light');
+    }
+
+    // One-time: move previous dark sessions to the light orange brand.
+    if (localStorage.getItem('anpixel-light-brand') !== '1') {
+        localStorage.setItem('appearance', 'light');
+        setCookie('appearance', 'light');
+        localStorage.setItem('anpixel-light-brand', '1');
     }
 
     currentAppearance = getStoredAppearance();
     applyTheme(currentAppearance);
 
-    // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 

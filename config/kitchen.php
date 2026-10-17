@@ -6,7 +6,8 @@ return [
 
     'email_verification' => env('KITCHEN_EMAIL_VERIFICATION', 'required'),
 
-    'storage_disk' => 'local',
+    // local = container/disk (Cloud Run demo OK); set FILESYSTEM_DISK / this for gcs later
+    'storage_disk' => env('KITCHEN_STORAGE_DISK', env('FILESYSTEM_DISK', 'local')),
 
     'upload' => [
         'max_bytes' => (int) env('KITCHEN_UPLOAD_MAX_BYTES', 500 * 1024 * 1024),
@@ -44,6 +45,17 @@ return [
     'uptime' => [
         'tcp_timeout_seconds' => (float) env('KITCHEN_UPTIME_TCP_TIMEOUT', 3),
         'stats_retention_days' => (int) env('KITCHEN_UPTIME_STATS_DAYS', 90),
+    ],
+
+    /*
+    | Gen AI (AI Builder Cup / Gemini). Default "stub" needs no API key.
+    | Set AI_PROVIDER=gemini and GEMINI_API_KEY to switch.
+    */
+    'genai' => [
+        'provider' => env('AI_PROVIDER', 'stub'),
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'endpoint' => env('GEMINI_API_ENDPOINT', 'https://generativelanguage.googleapis.com/v1beta'),
     ],
 
     'binaries' => [

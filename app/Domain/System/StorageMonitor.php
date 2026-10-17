@@ -8,7 +8,15 @@ class StorageMonitor
 {
     public function usedPercent(): float
     {
-        $path = Storage::disk(config('kitchen.storage_disk'))->path('');
+        $disk = Storage::disk(config('kitchen.storage_disk'));
+
+        // Cloud disks (GCS/S3) have no local path; don't block uploads on unknown capacity.
+        try {
+            $path = $disk->path('');
+        } catch (\Throwable) {
+            return 0.0;
+        }
+
         $total = @disk_total_space($path) ?: 0;
         $free = @disk_free_space($path) ?: 0;
 

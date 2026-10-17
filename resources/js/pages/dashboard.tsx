@@ -1,5 +1,5 @@
 import { Deferred, Head, Link } from '@inertiajs/react';
-import { HardDrive, Info, MonitorPlay } from 'lucide-react';
+import { HardDrive, Info, MonitorPlay, Sparkles } from 'lucide-react';
 import {
     CategoryBadge,
     EmptyState,
@@ -25,6 +25,7 @@ import {
 } from '@/lib/kitchen';
 import { dashboard, monitor } from '@/routes';
 import analyses from '@/routes/analyses';
+import assistant from '@/routes/assistant';
 import events from '@/routes/events';
 import system from '@/routes/system';
 import uptime from '@/routes/uptime';
@@ -100,10 +101,17 @@ export default function Dashboard({
             <Head title="Dashboard" />
             <Page>
                 <PageHeader
+                    brand
                     title="Dashboard"
-                    description={`Ringkasan ${tenant?.name ?? ''}. Angka utama hanya dari analisis nyata terbaru per video; hasil simulasi dipisahkan.`}
+                    description={`Ringkasan ${tenant?.name ?? 'dapur'} — fokus anomali, orang, dan area terlarang.`}
                     actions={
                         <>
+                            <Button variant="outline" asChild>
+                                <Link href={assistant.index()}>
+                                    <Sparkles />
+                                    Assistant
+                                </Link>
+                            </Button>
                             <Button variant="outline" asChild>
                                 <Link href={monitor()}>
                                     <MonitorPlay />
@@ -133,8 +141,12 @@ export default function Dashboard({
                     </div>
                 )}
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div
+                    className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                    data-test="dashboard-hero-stats"
+                >
                     <Stat
+                        emphasize
                         label="Perlu ditinjau"
                         value={stats.needs_review}
                         hint={
@@ -144,47 +156,22 @@ export default function Dashboard({
                         }
                     />
                     <Stat
-                        label="Orang terdeteksi"
-                        value={stats.people}
-                        hint={`Jejak orang dari ${scope}`}
-                    />
-                    <Stat
-                        label="Waktu di zona kerja"
-                        value={formatMs(stats.work_zone_ms)}
-                        hint="Total durasi orang di zona persiapan, kompor, cuci, dan kebersihan"
-                    />
-                    <Stat
-                        label="Masuk area terlarang"
+                        emphasize={stats.restricted > 0}
+                        label="Area terlarang"
                         value={stats.restricted}
                         hint="Kejadian nyata, 7 hari terakhir"
                     />
+                    <Stat
+                        label="Orang terdeteksi"
+                        value={stats.people}
+                        hint={`Jejak orang · ${scope}`}
+                    />
+                    <Stat
+                        label="Di zona kerja"
+                        value={formatMs(stats.work_zone_ms)}
+                        hint="Persiapan, kompor, cuci, kebersihan"
+                    />
                 </div>
-
-                <p
-                    className="flex items-start gap-2 rounded-lg border px-4 py-3 text-sm text-muted-foreground"
-                    data-test="ppe-note"
-                >
-                    <Info className="mt-0.5 size-4 shrink-0" />
-                    {ppeMeasured ? (
-                        <span>
-                            Kepatuhan APD 7 hari:{' '}
-                            <strong className="text-foreground">
-                                {formatPercent(stats.ppe_compliance)}
-                            </strong>{' '}
-                            dengan cakupan penilaian{' '}
-                            {formatPercent(stats.ppe_coverage)}. Waktu yang
-                            tidak dapat dinilai tidak dihitung patuh.
-                        </span>
-                    ) : (
-                        <span>
-                            Model AI yang dipakai saat ini hanya mendeteksi
-                            orang, belum APD (penutup rambut, celemek). Karena
-                            itu kepatuhan APD belum dihitung dan tidak dijadikan
-                            anomali; dashboard berfokus pada keberadaan orang,
-                            zona kerja, dan area terlarang.
-                        </span>
-                    )}
-                </p>
 
                 <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
                     <section className="space-y-3">
@@ -404,6 +391,27 @@ export default function Dashboard({
                         )}
                     </section>
                 </div>
+
+                <p
+                    className="flex items-start gap-2 text-xs text-muted-foreground"
+                    data-test="ppe-note"
+                >
+                    <Info className="mt-0.5 size-3.5 shrink-0" />
+                    {ppeMeasured ? (
+                        <span>
+                            Kepatuhan APD 7 hari:{' '}
+                            <strong className="text-foreground">
+                                {formatPercent(stats.ppe_compliance)}
+                            </strong>{' '}
+                            · cakupan {formatPercent(stats.ppe_coverage)}.
+                        </span>
+                    ) : (
+                        <span>
+                            Fokus dashboard: orang, zona kerja, dan area
+                            terlarang. Penilaian APD aktif bila model mendukung.
+                        </span>
+                    )}
+                </p>
 
                 <section className="space-y-3">
                     <div className="flex items-center justify-between">

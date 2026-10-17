@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Anpixel DapurSense — Status AI Builder Cup 2026</title>
+  <style>
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      font-size: 9.5pt;
+      line-height: 1.35;
+      margin: 0;
+    }
+    h1 { font-size: 16pt; margin: 0 0 2pt; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 11pt;
+      margin: 14pt 0 6pt;
+      padding-bottom: 3pt;
+      border-bottom: 1.5px solid #ef5023;
+      color: #111;
+    }
+    .meta { color: #555; font-size: 8.5pt; margin-bottom: 10pt; }
+    .meta strong { color: #111; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 4pt;
+      font-size: 8.5pt;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 4pt 6pt;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+    .ok { color: #0a7a3e; font-weight: 600; }
+    .partial { color: #b36b00; font-weight: 600; }
+    .no { color: #b42318; font-weight: 600; }
+    .note {
+      background: #fff8f5;
+      border-left: 3px solid #ef5023;
+      padding: 6pt 8pt;
+      margin: 8pt 0;
+      font-size: 8.5pt;
+    }
+    ol, ul { margin: 4pt 0 0 16pt; padding: 0; }
+    li { margin: 2pt 0; }
+    .footer {
+      margin-top: 12pt;
+      font-size: 7.5pt;
+      color: #777;
+      border-top: 1px solid #ddd;
+      padding-top: 6pt;
+    }
+    .brand { color: #ef5023; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1><span class="brand">Anpixel DapurSense</span> — Status vs AI Builder Cup 2026</h1>
+  <p class="meta">
+    Ringkasan internal untuk submit Hack2skill / Google Cloud AI Builder Cup.<br />
+    Repo: <strong>https://github.com/anpixelstudio/dapursense</strong> (public) ·
+    Dokumen dibuat: <strong>17 Oktober 2026</strong> ·
+    Deadline submit: <strong>18 Oktober 2026</strong>
+  </p>
+
+  <h2>1. Yang sudah ada di proyek</h2>
+  <table>
+    <thead>
+      <tr><th style="width:22%">Area</th><th>Detail</th><th style="width:14%">Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Produk inti</td><td>Dashboard CCTV dapur: video, analisis, anomali, zona, aktivitas, laporan, monitor, uptime perangkat</td><td class="ok">Ada</td></tr>
+      <tr><td>AI vision</td><td>YOLOX-Nano / WholeBody (deteksi orang), IoU tracker, rules zona &amp; area terlarang</td><td class="ok">Ada</td></tr>
+      <tr><td>Gen AI kerangka</td><td>StubAiAssistant + GeminiAiAssistant; saklar <code>AI_PROVIDER=stub|gemini</code></td><td class="ok">Ada</td></tr>
+      <tr><td>Gen AI UI</td><td>Halaman <code>/assistant</code> (chat SOP + laporan harian); tombol Ringkas di detail anomali</td><td class="ok">Ada</td></tr>
+      <tr><td>Gen AI API</td><td><code>POST /assistant/chat</code>, <code>/assistant/daily-report</code>, <code>/assistant/events/{id}/summarize</code></td><td class="ok">Ada</td></tr>
+      <tr><td>Infra Cloud Run</td><td>Dockerfile, <code>deploy/cloudrun/deploy.sh</code>, panduan <code>docs/GCP.md</code></td><td class="ok">Ada</td></tr>
+      <tr><td>Mode tanpa key</td><td>Default stub — demo lokal jalan tanpa GEMINI_API_KEY</td><td class="ok">Ada</td></tr>
+      <tr><td>GitHub public</td><td>anpixelstudio/dapursense</td><td class="ok">Ada</td></tr>
+      <tr><td>Brand</td><td>Logo Anpixel, nama Anpixel DapurSense</td><td class="ok">Ada</td></tr>
+      <tr><td>Tes otomatis</td><td>Pest 184 tes (termasuk Gen AI stub/gemini wiring)</td><td class="ok">Lulus</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. Belum ada / belum selesai</h2>
+  <table>
+    <thead>
+      <tr><th style="width:28%">Item</th><th>Catatan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>URL Cloud Run live</td><td>Skrip deploy siap; service publik belum di-deploy</td></tr>
+      <tr><td>GEMINI_API_KEY aktif</td><td>Masih mode stub; juri butuh Gemini sungguhan</td></tr>
+      <tr><td>Cloud SQL (Postgres)</td><td>App butuh Postgres; belum diikat ke GCP</td></tr>
+      <tr><td>Worker YOLOX di GCP</td><td>Image Cloud Run = web saja; worker Python belum di-container</td></tr>
+      <tr><td>Video demo ≤ 3 menit</td><td>Belum dibuat</td></tr>
+      <tr><td>Deck PDF submit</td><td>Belum (dokumen ini = status internal, bukan deck juri)</td></tr>
+      <tr><td>Tema resmi di form</td><td>Retail / Manufacturing belum dikunci di Hack2Skill</td></tr>
+      <tr><td>Tim 2–4 final</td><td>Pastikan di dashboard; tidak boleh solo / mahasiswa</td></tr>
+      <tr><td>Push Gen AI terbaru</td><td>Pastikan commit Dockerfile + Domain/Ai sudah di GitHub</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Cocok dengan aturan event?</h2>
+  <table>
+    <thead>
+      <tr><th style="width:38%">Syarat</th><th style="width:14%">Status</th><th>Catatan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Stack utama Google Cloud (Cloud Run / Firebase)</td><td class="partial">Sebagian</td><td>Kerangka ada; belum live di GCP</td></tr>
+      <tr><td>Gemini / Gemma dipakai bermakna</td><td class="partial">Siap colok</td><td>Kode ada; key belum → masih stub</td></tr>
+      <tr><td>Deploy Cloud Run / Firebase</td><td class="no">Belum</td><td>Jalankan deploy.sh setelah PROJECT_ID siap</td></tr>
+      <tr><td>GitHub public</td><td class="ok">Sudah</td><td>github.com/anpixelstudio/dapursense</td></tr>
+      <tr><td>Prototype end-to-end</td><td class="ok">Sudah</td><td>Lokal + Gen AI stub</td></tr>
+      <tr><td>Proyek baru dalam jendela hackathon</td><td class="partial">Hati-hati</td><td>Framing “edisi hackathon GCP+Gemini”, jangan klaim produk lama</td></tr>
+      <tr><td>Profesional 21+, JAPAC, bukan mahasiswa</td><td class="partial">Cek manual</td><td>Satu mahasiswa = diskualifikasi seluruh tim</td></tr>
+      <tr><td>Video + PDF submit</td><td class="no">Belum</td><td>Wajib sebelum deadline 18 Okt</td></tr>
+      <tr><td>Tim 2–4 orang</td><td class="partial">Cek form</td><td>Submit tidak boleh solo</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. Yang boleh vs tidak (ringkas aturan)</h2>
+  <table>
+    <thead>
+      <tr><th style="width:50%">Boleh</th><th>Tidak boleh</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Profesional / entrepreneur / startup · 21+ · JAPAC · tim 2–4 ·
+          prototype · Gemini/Gemma · Cloud Run/Firebase · YOLOX + Gemini ·
+          satu tema · GitHub public · video ≤3 menit
+        </td>
+        <td>
+          Mahasiswa · anggota luar JAPAC · solo submit · multi-tim/multi-tema ·
+          proyek lama pra-hackathon · stack utama non-GCP · hanya vision tanpa Gen AI Google ·
+          mockup tanpa prototype live
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Catatan kritis:</strong> Mode stub cukup untuk development, tetapi
+    <strong>tidak cukup untuk penilaian Gen AI (bobot 40%)</strong>.
+    Sebelum submit: set <code>AI_PROVIDER=gemini</code>, isi <code>GEMINI_API_KEY</code>,
+    deploy Cloud Run, dan demokan ringkas anomali + chat SOP + laporan harian.
+  </div>
+
+  <h2>5. Urutan sisa kerja</h2>
+  <ol>
+    <li>Push commit Gen AI + Docker ke GitHub (jika belum).</li>
+    <li>Deploy Cloud Run (<code>./deploy/cloudrun/deploy.sh</code>) — awalnya stub.</li>
+    <li>Isi Gemini key / Secret Manager → <code>AI_PROVIDER=gemini</code>.</li>
+    <li>Siapkan Cloud SQL atau skenario demo dengan data seed.</li>
+    <li>Rekam video demo ≤ 3 menit (masalah → live → Gemini → impact).</li>
+    <li>Deck PDF juri + pilih tema (rekomendasi: Retail &amp; Commerce).</li>
+    <li>Submit di dashboard Hack2Skill sebelum 18 Oktober 2026.</li>
+  </ol>
+
+  <p class="footer">
+    Anpixel Studio · Dokumen status internal AI Builder Cup 2026 ·
+    Sumber aturan: aibuildercup.com (FAQ &amp; Themes) ·
+    File sumber: docs/ai-builder-cup-status.html
+  </p>
+</body>
+</html>
