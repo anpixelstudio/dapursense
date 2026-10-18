@@ -8,6 +8,8 @@ node_modules
 vendor
 public/build
 public/hot
+# Host package discovery includes require-dev providers (e.g. Pail) — regenerate in image
+bootstrap/cache/*.php
 storage/app/private/**
 storage/logs/**
 storage/framework/cache/**
@@ -27,3 +29,7 @@ storage/inertia-devtools
 .cursor
 .agents
 tests
+samples/**/*.mp4
+ai-service/models/**
+ai-service/.venv/**
+*.onnx

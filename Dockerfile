@@ -14,10 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends git unzip libzi
     && rm -rf /var/lib/apt/lists/*
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
+ENV APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+ENV APP_ENV=production
 COPY . .
 COPY --from=phpdeps /app/vendor ./vendor
-# Wayfinder reads route files; no DB needed.
-RUN php artisan wayfinder:generate --with-form
+# Rebuild discovery for --no-dev vendor (host bootstrap/cache is dockerignored).
+RUN mkdir -p bootstrap/cache \
+    && php artisan package:discover --ansi \
+    && php artisan wayfinder:generate --with-form
 
 FROM node:22-bookworm AS frontend
 WORKDIR /app
@@ -27,6 +31,7 @@ COPY . .
 COPY --from=wayfinder /app/resources/js/routes ./resources/js/routes
 COPY --from=wayfinder /app/resources/js/actions ./resources/js/actions
 COPY --from=wayfinder /app/resources/js/wayfinder ./resources/js/wayfinder
+ENV WAYFINDER_SKIP=1
 RUN npm run build
 
 FROM php:8.4-cli-bookworm
@@ -45,7 +50,9 @@ COPY --from=wayfinder /app/resources/js/routes ./resources/js/routes
 COPY --from=wayfinder /app/resources/js/actions ./resources/js/actions
 COPY --from=wayfinder /app/resources/js/wayfinder ./resources/js/wayfinder
 
+ENV APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && php artisan package:discover --ansi \
     && chmod -R ug+rwx storage bootstrap/cache \
     && chmod +x deploy/cloudrun/entrypoint.sh
 

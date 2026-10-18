@@ -490,7 +490,7 @@ function CctvFeed({
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[repeating-linear-gradient(0deg,#171717_0px,#171717_2px,#0a0a0a_2px,#0a0a0a_4px)] text-neutral-400">
                             <VideoOff className="size-8" />
                             <span className="font-mono text-sm tracking-widest">
-                                TIDAK ADA SINYAL
+                                NO SIGNAL
                             </span>
                             <span className="text-xs">
                                 No ready recording for this camera yet
@@ -503,10 +503,17 @@ function CctvFeed({
                             {formatClock(now, feed.timezone)}
                         </span>
                         <span className="flex items-center gap-2">
-                            {feed.run && <span>{people} orang</span>}
+                            {feed.run && (
+                                <span>
+                                    {people} {people === 1 ? 'person' : 'people'}
+                                </span>
+                            )}
                             {feed.open_events > 0 && (
                                 <span className="rounded bg-red-600 px-1.5 py-0.5">
-                                    {feed.open_events} anomali
+                                    {feed.open_events}{' '}
+                                    {feed.open_events === 1
+                                        ? 'anomaly'
+                                        : 'anomalies'}
                                 </span>
                             )}
                         </span>

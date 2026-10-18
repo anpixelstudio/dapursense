@@ -23,7 +23,7 @@ class DeviceMonitor
 {
     public const SYSTEM_COMPONENTS = [
         'database' => 'Database',
-        'redis' => 'Antrean (Redis)',
+        'redis' => 'Queue (Redis)',
         'worker' => 'Worker AI',
         'storage' => 'Storage',
     ];

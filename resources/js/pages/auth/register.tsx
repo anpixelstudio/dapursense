@@ -114,7 +114,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                                     tabIndex={5}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Ulangi password"
+                                    placeholder="Confirm password"
                                     passwordrules={passwordRules}
                                 />
                                 <InputError
@@ -154,7 +154,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Sudah punya akun?{' '}
+                            Already have an account?{' '}
                             <TextLink href={login()} tabIndex={8}>
                                 Log in
                             </TextLink>

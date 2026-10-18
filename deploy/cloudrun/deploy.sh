@@ -57,6 +57,7 @@ gcloud services enable \
   cloudbuild.googleapis.com \
   secretmanager.googleapis.com \
   sqladmin.googleapis.com \
+  sql-component.googleapis.com \
   --project="$PROJECT_ID"
 
 echo "==> Artifact Registry ($AR_REPO)"
@@ -118,6 +119,7 @@ elif gcloud secrets describe gemini-api-key --project="$PROJECT_ID" >/dev/null 2
 fi
 
 ENV_VARS="$(cat <<EOF | tr '\n' ',' | sed 's/,$//'
+APP_NAME=VERA
 APP_ENV=production
 APP_DEBUG=false
 LOG_CHANNEL=stderr

@@ -274,7 +274,7 @@ export default function Dashboard({
 
                     <section className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <h2 className="font-medium">Kesehatan sistem</h2>
+                            <h2 className="font-medium">System health</h2>
                             {can('manage_organization') && (
                                 <Link
                                     href={system.index()}
