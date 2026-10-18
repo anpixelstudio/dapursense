@@ -13,7 +13,7 @@ Built for [Google Cloud AI Builder Cup 2026](https://aibuildercup.com/) (Hack2sk
 | **Theme** | **Manufacturing — Intelligent Operations & Industrial Efficiency** |
 | **Problem** | Commercial kitchens still rely on manual spot-checks for hair covers, gloves, and restricted zones. Missed PPE raises food-safety risk and audit cost. |
 | **Solution** | Upload CCTV clips → computer vision detects people & kitchen PPE → rules engine opens reviewable anomalies → **Gemini** turns evidence into SOP answers and daily ops reports. |
-| **Repo** | https://github.com/anpixelstudio/dapursense *(to be renamed to `vera`)* |
+| **Repo** | https://github.com/anpixelstudio/vera  |
 | **GCP project** | `gen-lang-client-0453464545` (display name **VERA**) |
 | **Deploy target** | Google Cloud **Cloud Run** + Cloud SQL + **Gemini** |
 
@@ -227,5 +227,5 @@ Stock samples: Mixkit — check their license before public marketing use.
 
 - Hackathon: https://aibuildercup.com/  
 - Themes: https://aibuildercup.com/themes.html  
-- Repo (current): https://github.com/anpixelstudio/dapursense  
+- Repo (current): https://github.com/anpixelstudio/vera  
 - Deploy notes: [`docs/GCP.md`](docs/GCP.md)
