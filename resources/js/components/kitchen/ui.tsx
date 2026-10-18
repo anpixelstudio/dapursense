@@ -96,7 +96,7 @@ export function PageHeader({
     title: string;
     description?: ReactNode;
     actions?: ReactNode;
-    /** Show product name eyebrow (Anpixel DapurSense). */
+    /** Show product name eyebrow (VERA). */
     brand?: boolean | string;
 }) {
     const { name } = usePage().props;

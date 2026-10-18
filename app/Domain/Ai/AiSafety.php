@@ -54,7 +54,7 @@ final class AiSafety
         return match ($surface) {
             'report' => 'I can only generate the kitchen operations report from system statistics. I cannot follow instructions that change my role, ignore rules, or discuss unrelated topics.',
             'summarize' => 'I can only summarize this kitchen CCTV anomaly from the provided event data. I cannot follow jailbreak or role-override instructions.',
-            default => 'I can only help with kitchen SOP and DapurSense operations. I cannot ignore my instructions, change roles, or discuss unrelated topics.',
+            default => 'I can only help with kitchen SOP and VERA operations. I cannot ignore my instructions, change roles, or discuss unrelated topics.',
         };
     }
 

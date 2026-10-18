@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Provision GCP for Anpixel DapurSense (Cloud SQL Postgres + optional GCS + secrets).
+# Provision GCP for VERA (Cloud SQL Postgres + optional GCS + secrets).
 #
 # Usage:
 #   export PROJECT_ID=your-gcp-project
@@ -8,19 +8,23 @@
 #   ./deploy/cloudrun/provision.sh
 #
 # Optional:
-#   CREATE_GCS_BUCKET=1 GCS_BUCKET=dapursense-media-$PROJECT_ID ./deploy/cloudrun/provision.sh
+#   CREATE_GCS_BUCKET=1 GCS_BUCKET=vera-media-$PROJECT_ID ./deploy/cloudrun/provision.sh
+#
+# Note: default SQL/user/AR ids keep `dapursense-*` when already provisioned;
+# override with SQL_INSTANCE=vera-pg AR_REPO=vera for greenfield installs.
 
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:?Set PROJECT_ID}"
 REGION="${REGION:-asia-southeast1}"
+AR_REPO="${AR_REPO:-vera}"
 SQL_INSTANCE="${SQL_INSTANCE:-dapursense-pg}"
 SQL_TIER="${SQL_TIER:-db-f1-micro}"
 DB_NAME="${DB_NAME:-kitchen_intelligence}"
 DB_USER="${DB_USER:-dapursense}"
 DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD (will be stored in Secret Manager)}"
 CREATE_GCS_BUCKET="${CREATE_GCS_BUCKET:-0}"
-GCS_BUCKET="${GCS_BUCKET:-dapursense-media-${PROJECT_ID}}"
+GCS_BUCKET="${GCS_BUCKET:-vera-media-${PROJECT_ID}}"
 
 CONNECTION_NAME="${PROJECT_ID}:${REGION}:${SQL_INSTANCE}"
 
@@ -34,14 +38,13 @@ gcloud services enable \
   cloudbuild.googleapis.com \
   secretmanager.googleapis.com \
   sqladmin.googleapis.com \
-  sql.googleapis.com \
   storage.googleapis.com \
   generativelanguage.googleapis.com \
   --project="$PROJECT_ID"
 
-echo "==> Artifact Registry (dapursense)"
-gcloud artifacts repositories describe dapursense --location="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1 \
-  || gcloud artifacts repositories create dapursense \
+echo "==> Artifact Registry ($AR_REPO)"
+gcloud artifacts repositories describe "$AR_REPO" --location="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1 \
+  || gcloud artifacts repositories create "$AR_REPO" \
        --repository-format=docker --location="$REGION" --project="$PROJECT_ID"
 
 echo "==> Cloud SQL Postgres ($SQL_INSTANCE / $SQL_TIER)"

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Kitchen Intelligence Report {{ $data['identity']['report_id'] }}</title>
+    <title>VERA Report {{ $data['identity']['report_id'] }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111; }
         h1 { font-size: 16px; margin: 0 0 4px; }
@@ -16,7 +16,7 @@
     </style>
 </head>
 <body>
-    <h1>Kitchen Intelligence Anomaly Report</h1>
+    <h1>VERA Anomaly Report</h1>
     <div class="muted">{{ $data['identity']['organization'] }} · Period {{ $data['identity']['period']['from'] }} to {{ $data['identity']['period']['to'] }} · Timezone {{ $data['identity']['timezone'] }}</div>
 
     @if ($data['identity']['contains_simulation'])

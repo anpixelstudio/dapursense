@@ -1,6 +1,6 @@
-# Hackathon / Cloud Run image — Laravel web (Cloud SQL + Gen AI stub/Gemini via env).
-# Build: docker build -t dapursense .
-# Run:   docker run --rm -p 8080:8080 -e APP_KEY=base64:... -e AI_PROVIDER=stub dapursense
+# Hackathon / Cloud Run image — VERA Laravel web (Cloud SQL + Gen AI stub/Gemini via env).
+# Build: docker build -t vera .
+# Run:   docker run --rm -p 8080:8080 -e APP_KEY=base64:... -e AI_PROVIDER=stub vera
 # Deploy: deploy/cloudrun/provision.sh then deploy/cloudrun/deploy.sh (see docs/GCP.md)
 
 FROM composer:2 AS phpdeps

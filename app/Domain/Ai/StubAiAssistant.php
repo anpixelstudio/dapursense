@@ -162,7 +162,7 @@ TXT);
 **Ops snapshot ({$periodLabel}):**
 - Events created: {$events}
 - People detected (CCTV tracks): {$people}
-- Active DapurSense team members: {$team}
+- Active VERA team members: {$team}
 - Still OPEN / ACKNOWLEDGED: {$open}
 
 **You can do now:**
@@ -209,7 +209,7 @@ TXT);
         return trim(<<<TXT
 [Demo mode — team & presence]
 
-**DapurSense team (org accounts):** {$memberCount} active member(s)
+**VERA team (org accounts):** {$memberCount} active member(s)
 
 {$memberList}
 
@@ -217,7 +217,7 @@ TXT);
 - Person tracks: {$tracks}
 - Succeeded analyses: {$runs}
 
-**Note:** Team count = registered DapurSense users, **not** HR payroll. Person tracks = people seen in analysed video.
+**Note:** Team count = registered VERA users, **not** HR payroll. Person tracks = people seen in analysed video.
 
 - [ ] Manage members at `/members`
 - [ ] Ask for reports **today / yesterday / this month**

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy Anpixel DapurSense web to Cloud Run + Cloud SQL (+ optional Gemini).
+# Deploy VERA web to Cloud Run + Cloud SQL (+ optional Gemini).
 #
 # Prereq: ./deploy/cloudrun/provision.sh (or existing Cloud SQL instance)
 #
@@ -21,12 +21,14 @@ cd "$ROOT"
 
 PROJECT_ID="${PROJECT_ID:?Set PROJECT_ID}"
 REGION="${REGION:-asia-southeast1}"
-SERVICE="${SERVICE:-dapursense}"
+SERVICE="${SERVICE:-vera}"
+# Artifact Registry repo id (product brand). Cloud SQL instance/user may still use legacy ids.
+AR_REPO="${AR_REPO:-vera}"
 SQL_INSTANCE="${SQL_INSTANCE:-dapursense-pg}"
 CLOUD_SQL_CONNECTION="${CLOUD_SQL_CONNECTION:-${PROJECT_ID}:${REGION}:${SQL_INSTANCE}}"
 DB_DATABASE="${DB_DATABASE:-kitchen_intelligence}"
 DB_USERNAME="${DB_USERNAME:-dapursense}"
-IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/dapursense/${SERVICE}:latest"
+IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/${SERVICE}:latest"
 MIGRATE_ON_BOOT="${MIGRATE_ON_BOOT:-1}"
 MEMORY="${MEMORY:-1Gi}"
 CPU="${CPU:-1}"
@@ -57,9 +59,9 @@ gcloud services enable \
   sqladmin.googleapis.com \
   --project="$PROJECT_ID"
 
-echo "==> Artifact Registry"
-gcloud artifacts repositories describe dapursense --location="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1 \
-  || gcloud artifacts repositories create dapursense \
+echo "==> Artifact Registry ($AR_REPO)"
+gcloud artifacts repositories describe "$AR_REPO" --location="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1 \
+  || gcloud artifacts repositories create "$AR_REPO" \
        --repository-format=docker --location="$REGION" --project="$PROJECT_ID"
 
 # Prefer Secret Manager for APP_KEY

@@ -263,7 +263,7 @@ class AiAssistantController extends Controller
             'team' => [
                 'active_member_count' => count($members),
                 'members' => $members,
-                'note' => 'Registered DapurSense users for this organization (not HR payroll headcount).',
+                'note' => 'Registered VERA users for this organization (not HR payroll headcount).',
             ],
             'ui_hints' => [
                 'reports_page' => '/reports',

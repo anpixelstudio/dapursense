@@ -5,9 +5,8 @@ import { dashboard, login } from '@/routes';
 import { register } from '@/routes';
 
 /**
- * DapurSense marketing landing.
- * Dark event language (AI Builder Cup reference) + Anpixel orange accent.
- * Off-black surfaces, pill CTA, one full-bleed hero photo, no rainbow card soup.
+ * VERA marketing landing.
+ * Vision-based Evaluation & Real-time Alerts — AI Builder Cup + orange accent.
  */
 
 const STACK = ['Cloud Run', 'Cloud SQL', 'Gemini 2.5 Flash', 'YOLOX'];
@@ -52,10 +51,10 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="DapurSense">
+            <Head title="VERA">
                 <meta
                     name="description"
-                    content="Anpixel DapurSense - kitchen intelligence with computer vision and Gemini Gen AI on Google Cloud."
+                    content="VERA — Vision-based Evaluation & Real-time Alerts. Objective kitchen CCTV intelligence with Gemini on Google Cloud."
                 />
             </Head>
 
@@ -101,7 +100,7 @@ export default function Welcome() {
 
                 <section className="relative flex min-h-[100dvh] items-end overflow-hidden">
                     <img
-                        src="/images/dapursense-hero.jpg"
+                        src="/images/vera-hero.jpg"
                         alt="Dark commercial kitchen with a CCTV camera"
                         className="absolute inset-0 size-full object-cover"
                         fetchPriority="high"
@@ -115,17 +114,17 @@ export default function Welcome() {
                         className={`relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-24 sm:px-8 sm:pb-20 transition duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${entered ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
                     >
                         <p className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-[#f9a619] uppercase">
-                            Anpixel DapurSense
+                            VERA
                         </p>
                         <h1 className="max-w-3xl text-[clamp(2.5rem,8vw,5.5rem)] leading-[0.95] font-semibold tracking-[-0.04em]">
-                            Kitchen intelligence
+                            Vision-based Evaluation
                             <span className="block text-white/55">
-                                on Google Cloud
+                                &amp; Real-time Alerts
                             </span>
                         </h1>
                         <p className="mt-5 max-w-md text-base text-white/70 sm:text-lg">
-                            YOLOX watches the floor. Gemini explains what
-                            happened. Ready to demo on Cloud Run.
+                            Objective AI for kitchen CCTV — detect, alert,
+                            explain. Named for “vera”: true and honest.
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             <Link
@@ -170,7 +169,7 @@ export default function Welcome() {
                     <div className="space-y-6 text-sm leading-relaxed text-white/60 sm:text-base">
                         <p>
                             Kitchen video creates technical anomalies that are
-                            hard to read at speed. DapurSense combines computer
+                            hard to read at speed. VERA combines computer
                             vision with Gen AI so events can be summarized,
                             queried against SOP, and reported in plain language.
                         </p>
@@ -264,7 +263,7 @@ export default function Welcome() {
 
                 <footer className="border-t border-white/10">
                     <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 text-xs text-white/35 sm:flex-row sm:justify-between sm:px-8">
-                        <p>© {new Date().getFullYear()} Anpixel DapurSense</p>
+                        <p>© {new Date().getFullYear()} VERA · Anpixel</p>
                         <p>Google Cloud · Gemini · Cloud Run</p>
                     </div>
                 </footer>

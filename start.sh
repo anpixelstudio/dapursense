@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Menjalankan seluruh stack Kitchen Intelligence secara lokal.
+# Run the full VERA stack locally.
 #   ./start.sh         jalankan semua layanan (Ctrl+C untuk berhenti)
 #   ./start.sh stop    hentikan layanan yang masih berjalan dari sesi sebelumnya
 set -euo pipefail
@@ -149,7 +149,7 @@ php artisan system:status || true
 
 cat <<EOF
 
-Kitchen Intelligence berjalan di http://127.0.0.1:$APP_PORT
+VERA is running at http://127.0.0.1:$APP_PORT
 Log: storage/logs/{serve,queue,schedule,ai-api,ai-runner}.log
 Tekan Ctrl+C untuk menghentikan semua layanan.
 EOF

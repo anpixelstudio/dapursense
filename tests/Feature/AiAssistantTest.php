@@ -149,6 +149,6 @@ test('owners can open the assistant page and call stub endpoints', function () {
         ->json('text');
 
     expect($peopleReply)
-        ->toContain('DapurSense team')
+        ->toContain('VERA team')
         ->toContain('/members');
 });

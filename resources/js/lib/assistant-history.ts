@@ -7,12 +7,15 @@ export type ChatThread = {
     turns: ChatTurn[];
 };
 
-const STORAGE_KEY = 'dapursense.assistant.chats.v1';
+const STORAGE_KEY = 'vera.assistant.chats.v1';
+const LEGACY_STORAGE_KEY = 'dapursense.assistant.chats.v1';
 const MAX_THREADS = 30;
 
 function readAll(): ChatThread[] {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw =
+            localStorage.getItem(STORAGE_KEY) ??
+            localStorage.getItem(LEGACY_STORAGE_KEY);
         if (!raw) {
             return [];
         }

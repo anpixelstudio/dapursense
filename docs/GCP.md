@@ -42,7 +42,7 @@ chmod +x deploy/cloudrun/*.sh
 Skrip membuat / memastikan:
 
 - API: Cloud Run, Artifact Registry, Cloud Build, Secret Manager, Cloud SQL, Storage, Generative Language
-- Artifact Registry `dapursense`
+- Artifact Registry `vera` (legacy `dapursense` may still exist)
 - Cloud SQL Postgres `dapursense-pg` + DB `kitchen_intelligence` + user `dapursense`
 - Secret `db-password` (+ `app-key` / `gemini-api-key` jika di-export)
 - IAM: runtime SA = `cloudsql.client` + `secretAccessor`

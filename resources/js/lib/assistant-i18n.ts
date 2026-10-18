@@ -1,6 +1,6 @@
 export type AssistantLocale = 'en' | 'id';
 
-const LOCALE_KEY = 'dapursense.assistant.locale';
+const LOCALE_KEY = 'vera.assistant.locale';
 
 /** Always English — ID locale is retired. */
 export function loadAssistantLocale(): AssistantLocale {
@@ -59,7 +59,7 @@ type Copy = {
 
 const EN: Copy = {
     title: 'Assistant',
-    brand: 'Anpixel DapurSense',
+    brand: 'VERA',
     chat: 'Chat',
     report: 'Report',
     history: 'History',

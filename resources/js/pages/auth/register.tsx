@@ -67,7 +67,7 @@ export default function Register({ passwordRules, invitation }: Props) {
                                         required
                                         tabIndex={2}
                                         name="organization_name"
-                                        placeholder="Contoh: Hotel Anpixel Jakarta"
+                                        placeholder="e.g. Central Kitchen Jakarta"
                                     />
                                     <InputError
                                         message={errors.organization_name}

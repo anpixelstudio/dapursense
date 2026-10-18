@@ -10,7 +10,7 @@ export type UseAppearanceReturn = {
 };
 
 const listeners = new Set<() => void>();
-/** Anpixel brand default: light orange UI (not OS dark). */
+/** VERA brand default: light orange UI (not OS dark). */
 let currentAppearance: Appearance = 'light';
 
 const prefersDark = (): boolean => {
@@ -92,10 +92,10 @@ export function initializeTheme(): void {
     }
 
     // One-time: move previous dark sessions to the light orange brand.
-    if (localStorage.getItem('anpixel-light-brand') !== '1') {
+    if (localStorage.getItem('vera-light-brand') !== '1') {
         localStorage.setItem('appearance', 'light');
         setCookie('appearance', 'light');
-        localStorage.setItem('anpixel-light-brand', '1');
+        localStorage.setItem('vera-light-brand', '1');
     }
 
     currentAppearance = getStoredAppearance();

@@ -1,22 +1,29 @@
-# Anpixel DapurSense
+# VERA
 
-**Kitchen CCTV intelligence for PPE & SOP compliance** — built for [Google Cloud AI Builder Cup 2026](https://aibuildercup.com/) (Hack2skill · JAPAC).
+**Vision-based Evaluation & Real-time Alerts**
+
+*Vera* means “true / honest” — objective AI for kitchen CCTV compliance.
+
+Built for [Google Cloud AI Builder Cup 2026](https://aibuildercup.com/) (Hack2skill · JAPAC).
 
 | | |
 | --- | --- |
+| **Product** | **VERA** |
+| **Tagline** | Vision-based Evaluation & Real-time Alerts |
 | **Theme** | **Manufacturing — Intelligent Operations & Industrial Efficiency** |
 | **Problem** | Commercial kitchens still rely on manual spot-checks for hair covers, gloves, and restricted zones. Missed PPE raises food-safety risk and audit cost. |
 | **Solution** | Upload CCTV clips → computer vision detects people & kitchen PPE → rules engine opens reviewable anomalies → **Gemini** turns evidence into SOP answers and daily ops reports. |
-| **Repo** | https://github.com/anpixelstudio/dapursense |
+| **Repo** | https://github.com/anpixelstudio/dapursense *(to be renamed to `vera`)* |
+| **GCP project** | `gen-lang-client-0453464545` (display name **VERA**) |
 | **Deploy target** | Google Cloud **Cloud Run** + Cloud SQL + **Gemini** |
 
-> Secondary fit: *Retail & Commerce* (multi-outlet F&B operations). Primary pitch: **Manufacturing / industrial kitchen ops**.
+> Secondary fit: *Retail & Commerce* (multi-outlet F&B). Primary pitch: **Manufacturing / industrial kitchen ops**.
 
 ---
 
 ## Why this fits AI Builder Cup judging
 
-| Criterion (weight) | How DapurSense addresses it |
+| Criterion (weight) | How VERA addresses it |
 | --- | --- |
 | **Technical Merit & Gen AI (40%)** | End-to-end stack: YOLOX person + YOLOv8 hairnet/gloves (ONNX), IoPPE association, temporal rules, Laravel product UI. **Gemini** powers `/assistant` chat, anomaly summarize, and locked daily reports (`AI_PROVIDER=gemini`). |
 | **Problem Alignment & Impact (25%)** | Real F&B / central kitchen pain: PPE compliance, restricted-zone dwell, review workflow, CSV/PDF reports for supervisors. |
@@ -29,7 +36,7 @@
 | --- | --- |
 | Google AI (Gemini / Gemma / agentic platform) | ✅ Gemini assistant (`app/Domain/Ai`, `/assistant`) |
 | Deploy on Cloud Run / Firebase / GCP | ✅ Scripts + guide: `deploy/cloudrun/`, `docs/GCP.md` |
-| Public GitHub | ✅ this repository |
+| Public GitHub | ✅ this repository *(rename to `vera` planned)* |
 | Working prototype | ✅ local `./start.sh` + Cloud Run path |
 | Demo video ≤ 3 min (EN) | ⬜ record from Monitor / Analysis / Assistant |
 | Proposal deck PDF (EN) | ⬜ use this README + `docs/ai-builder-cup-status.html` as source |
@@ -40,7 +47,7 @@ All judge-facing materials must be in **English** (product UI is English-only).
 
 ## Product overview
 
-**Anpixel DapurSense** helps kitchen supervisors:
+**VERA** helps kitchen supervisors:
 
 1. **Ingest** CCTV uploads per camera source  
 2. **Analyse** with AI models (person + optional PPE) against drawn zones  
@@ -97,6 +104,7 @@ Laravel 12 API + Postgres + Redis
 ```bash
 cp .env.example .env
 # set DB_* and APP_KEY (php artisan key:generate)
+# APP_NAME=VERA
 
 composer install
 cd ai-service && python3 -m venv .venv && .venv/bin/pip install -r requirements.lock && cd ..
@@ -140,7 +148,7 @@ Sample kitchen stock clips (links only; MP4s gitignored): `samples/kitchen/READM
 Full guide: **[`docs/GCP.md`](docs/GCP.md)**
 
 ```bash
-export PROJECT_ID=your-gcp-project
+export PROJECT_ID=gen-lang-client-0453464545   # display name: VERA
 export REGION=asia-southeast1
 export DB_PASSWORD='…'
 export GEMINI_API_KEY='…'   # required for Gen AI scoring
@@ -148,10 +156,12 @@ export GEMINI_API_KEY='…'   # required for Gen AI scoring
 ./deploy/cloudrun/provision.sh
 export CLOUD_SQL_CONNECTION="${PROJECT_ID}:${REGION}:dapursense-pg"
 export APP_KEY="$(php artisan key:generate --show)"
-./deploy/cloudrun/deploy.sh
+./deploy/cloudrun/deploy.sh   # Cloud Run service name: vera
 ```
 
 Set `AI_PROVIDER=gemini` on the Cloud Run service so judges see real Gen AI.
+
+> **Infra note:** Cloud SQL instance/user created earlier keep legacy ids (`dapursense-pg` / `dapursense`). Product & Cloud Run service are branded **VERA**.
 
 ---
 
@@ -165,7 +175,7 @@ Set `AI_PROVIDER=gemini` on the Cloud Run service so judges see real Gen AI.
 | `yolox-wholebody12-n` | onnx-wholebody | Person (overhead-friendly) |
 | **`yolox-kitchen-ppe`** | onnx-kitchen-ppe | Person + **hair_cover** + **glove** |
 
-PPE ONNX is optional; install with `KITCHEN_PPE=1 ./start.sh` (exports from Hugging Face weights). See `database/seeders/SystemSeeder.php`.
+PPE ONNX is optional; install with `KITCHEN_PPE=1 ./start.sh`. See `database/seeders/SystemSeeder.php`.
 
 ---
 
@@ -181,24 +191,27 @@ cd ai-service && .venv/bin/pytest -q
 ## Project layout
 
 ```
-kitchen-intelligence/
-├── app/Domain/Ai/          # Gemini + stub assistants, safety prompts
-├── ai-service/worker/      # Vision pipeline, kitchen PPE, rules
-├── deploy/cloudrun/        # GCP provision & deploy
-├── docs/GCP.md             # Cloud Run + Gemini deploy guide
+kitchen-intelligence/          # local folder name (legacy)
+├── app/Domain/Ai/             # Gemini + stub assistants, safety prompts
+├── ai-service/worker/         # Vision pipeline, kitchen PPE, rules
+├── deploy/cloudrun/           # GCP provision & deploy (service: vera)
+├── docs/GCP.md
 ├── docs/ai-builder-cup-status.html
-├── resources/js/           # React (Inertia) English UI
-└── samples/kitchen/        # Stock kitchen video sources (README)
+├── resources/js/              # React (Inertia) English UI
+└── samples/kitchen/           # Stock kitchen video sources
 ```
 
 ---
 
-## Team & brand
+## Brand
 
-- **Product:** Anpixel DapurSense  
-- **Studio:** Anpixel  
-- **Event:** Google Cloud AI Builder Cup 2026  
-- **Eligibility reminder:** working professionals, teams of 2–4 (not students)
+| | |
+| --- | --- |
+| **Name** | VERA |
+| **Expansion** | Vision-based Evaluation & Real-time Alerts |
+| **Meaning** | *Vera* = true / honest — objective AI |
+| **Studio** | Anpixel |
+| **Event** | Google Cloud AI Builder Cup 2026 |
 
 ---
 
@@ -214,5 +227,5 @@ Stock samples: Mixkit — check their license before public marketing use.
 
 - Hackathon: https://aibuildercup.com/  
 - Themes: https://aibuildercup.com/themes.html  
-- This repo: https://github.com/anpixelstudio/dapursense  
+- Repo (current): https://github.com/anpixelstudio/dapursense  
 - Deploy notes: [`docs/GCP.md`](docs/GCP.md)

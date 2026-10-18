@@ -1,4 +1,4 @@
-# Kitchen sample videos (DapurSense)
+# Kitchen sample videos (VERA)
 
 Free stock clips of restaurant / industrial kitchens — for upload tests in **Videos & Analysis**.
 
@@ -21,13 +21,6 @@ MP4 files in this folder are **gitignored** (large). Download locally for demos.
 
 Source: [Mixkit](https://mixkit.co/) free stock. Check Mixkit’s license before public marketing use.
 
-Re-download example (CDN; Mixkit pages may return 403):
-
-```bash
-# from kitchen-intelligence/
-# use the download script or Mixkit CDN URLs already used in prior setup
-```
-
 ## More free sources
 
 1. **Pexels — Restaurant Kitchen** — https://www.pexels.com/search/videos/restaurant%20kitchen/
@@ -37,7 +30,7 @@ Re-download example (CDN; Mixkit pages may return 403):
 5. **Mixkit — Kitchen** — https://mixkit.co/free-stock-video/kitchen/
 6. **Mixkit — Cooking** — https://mixkit.co/free-stock-video/cooking/
 
-## Tips for DapurSense demos
+## Tips for VERA demos
 
 - Prefer **medium / wide** shots (full kitchen + people), not hand-only close-ups.
 - Ideal clip length: 10–60 seconds, horizontal HD.
