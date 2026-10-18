@@ -16,8 +16,28 @@ Built for [Google Cloud AI Builder Cup 2026](https://aibuildercup.com/) (Hack2sk
 | **Repo** | https://github.com/anpixelstudio/vera  |
 | **GCP project** | `gen-lang-client-0453464545` (display name **VERA**) |
 | **Deploy target** | Google Cloud **Cloud Run** + Cloud SQL + **Gemini** |
+| **Live demo** | https://vera.anpixel.com |
 
 > Secondary fit: *Retail & Commerce* (multi-outlet F&B). Primary pitch: **Manufacturing / industrial kitchen ops**.
+
+---
+
+## Demo login (full access)
+
+Judges / reviewers can sign in with the dedicated demo account (**Owner** on all tenants + **platform admin**):
+
+| | |
+| --- | --- |
+| **URL** | https://vera.anpixel.com/login · local http://127.0.0.1:8000/login |
+| **Email** | `demo@vera.app` |
+| **Password** | `VeraDemo2026!` |
+| **Access** | Full — manage org/members/locations/sources/rules, upload + analysis, review anomalies, reports, Assistant, System |
+
+Recreate / reset locally or on Cloud SQL:
+
+```bash
+php artisan db:seed --class=DemoUserSeeder
+```
 
 ---
 
@@ -133,11 +153,12 @@ AI_PROVIDER=stub          # demo answers without a key
 
 ### Demo path for judges (≤ 3 minutes)
 
-1. Monitor / Videos — show kitchen CCTV context  
-2. Run analysis with **`yolox-kitchen-ppe`** (or **simulation** if models not present)  
-3. Open an anomaly — evidence + review  
-4. **Assistant** — ask SOP / generate daily report (with Gemini key)  
-5. Mention Cloud Run + Gemini on GCP  
+1. Sign in as **`demo@vera.app` / `VeraDemo2026!`** (see [Demo login](#demo-login-full-access))  
+2. Monitor / Videos — show kitchen CCTV context  
+3. Run analysis with **`yolox-kitchen-ppe`** (or **simulation** if models not present)  
+4. Open an anomaly — evidence + review  
+5. **Assistant** — ask SOP / generate daily report (with Gemini key)  
+6. Mention Cloud Run + Gemini on GCP  
 
 Sample kitchen stock clips (links only; MP4s gitignored): `samples/kitchen/README.md`
 
